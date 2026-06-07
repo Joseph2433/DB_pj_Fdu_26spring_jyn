@@ -14,15 +14,24 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { Send } from 'lucide-vue-next'
 
 const props = defineProps({
-  postId: { type: Number, required: true }
+  postId: { type: Number, required: true },
+  prefill: { type: String, default: '' },
+  prefillKey: { type: Number, default: 0 }
 })
 
 const emit = defineEmits(['submit'])
 const content = ref('')
+
+watch(
+  () => [props.prefill, props.prefillKey],
+  ([prefill]) => {
+    if (prefill) content.value = prefill
+  }
+)
 
 function submit() {
   const trimmed = content.value.trim()

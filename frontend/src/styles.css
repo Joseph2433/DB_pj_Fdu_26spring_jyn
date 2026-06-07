@@ -159,6 +159,23 @@ h2 {
   color: var(--coral);
 }
 
+.text-button {
+  border: 0;
+  background: transparent;
+  color: var(--moss);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 0;
+}
+
+.text-button:hover,
+.text-button:focus-visible {
+  color: var(--moss-dark);
+  outline: none;
+  text-decoration: underline;
+}
+
 .full {
   width: 100%;
 }
@@ -610,6 +627,14 @@ h2 {
   font-size: 13px;
 }
 
+.comment-head {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
 .comment-list span {
   overflow-wrap: anywhere;
   white-space: pre-wrap;
@@ -792,6 +817,17 @@ h2 {
 .editable-post {
   display: grid;
   gap: 12px;
+}
+
+.post-owner-actions {
+  margin-left: auto;
+}
+
+.post-edit-panel {
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
 }
 
 .review-layout {
