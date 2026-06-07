@@ -6,12 +6,32 @@
           <p class="eyebrow">Review Queue</p>
           <h2>朋友圈审核</h2>
         </div>
-        <button class="icon-button" type="button" title="刷新列表" @click="loadPosts">
-          <RefreshCw class="button-icon" aria-hidden="true" />
-        </button>
+        <div class="review-toolbar">
+          <div class="segmented compact-segmented" aria-label="审核视图切换">
+            <button
+              data-test="review-mode-list"
+              type="button"
+              :class="{ active: viewMode === 'list' }"
+              @click="viewMode = 'list'"
+            >
+              队列
+            </button>
+            <button
+              data-test="review-mode-card"
+              type="button"
+              :class="{ active: viewMode === 'card' }"
+              @click="viewMode = 'card'"
+            >
+              朋友圈
+            </button>
+          </div>
+          <button class="icon-button" type="button" title="刷新列表" @click="loadPosts">
+            <RefreshCw class="button-icon" aria-hidden="true" />
+          </button>
+        </div>
       </header>
 
-      <div class="review-table">
+      <div v-if="viewMode === 'list'" class="review-table">
         <article v-for="post in posts" :key="post.postId" class="review-row">
           <div>
             <strong>动态 #{{ post.postId }}</strong>
@@ -19,13 +39,58 @@
           </div>
           <p>{{ post.content }}</p>
           <span class="meta-pill">{{ post.status }} · 评论 {{ post.commentCount }}</span>
-          <button class="button danger" type="button" @click="removePost(post.postId)">
+          <button class="button danger" type="button" :data-test="`admin-delete-post-${post.postId}`" @click="removePost(post.postId)">
             <Trash2 class="button-icon" aria-hidden="true" />
             删除
           </button>
-          <button class="button ghost" type="button" @click="targetUser = post.authorId">选择用户</button>
         </article>
       </div>
+      <section v-else class="feed-masonry review-card-feed">
+        <PostCard
+          v-for="post in posts"
+          :key="post.postId"
+          :post="reviewPostCard(post)"
+          :can-comment="false"
+        >
+          <template #actions>
+            <button class="button danger" type="button" :data-test="`admin-delete-post-${post.postId}`" @click="removePost(post.postId)">
+              <Trash2 class="button-icon" aria-hidden="true" />
+              删除
+            </button>
+          </template>
+          <template #after-content>
+            <div class="review-card-meta">
+              <span class="meta-pill review-status-pill">{{ post.status }}</span>
+              <section
+                v-if="reviewComments(post).length"
+                class="review-comment-panel"
+                :data-test="`review-comments-${post.postId}`"
+              >
+                <div class="review-comment-panel-head">
+                  <strong>评论明细</strong>
+                  <span>{{ reviewComments(post).length }} 条</span>
+                </div>
+                <ul class="review-comment-list">
+                  <li v-for="(comment, index) in reviewComments(post)" :key="comment.id || `${post.postId}-${index}`">
+                    <div class="review-comment-line">
+                      <strong>{{ authorLabel(comment) }}</strong>
+                      <small>{{ formatDateTime(comment.createdAt) }}</small>
+                    </div>
+                    <p>{{ comment.content }}</p>
+                  </li>
+                </ul>
+              </section>
+              <p
+                v-else-if="commentCount(post) > 0"
+                class="review-comment-missing"
+                :data-test="`review-comments-${post.postId}`"
+              >
+                当前有 {{ commentCount(post) }} 条评论，接口未返回评论明细
+              </p>
+            </div>
+          </template>
+        </PostCard>
+      </section>
 
       <p v-if="posts.length === 0" class="empty-state">暂无可审核朋友圈</p>
     </div>
@@ -53,12 +118,14 @@
 import { onMounted, ref } from 'vue'
 import { RefreshCw, ShieldAlert, Trash2 } from 'lucide-vue-next'
 import { adminDeletePost, adminDeleteUser, fetchAdminPosts } from '../api/client'
-import { authorLabel, formatDateTime } from '../utils/formatters'
+import PostCard from './PostCard.vue'
+import { authorLabel, commentCount, formatDateTime } from '../utils/formatters'
 
 const posts = ref([])
 const targetUser = ref(null)
 const message = ref('')
 const messageType = ref('muted-message')
+const viewMode = ref('list')
 
 async function loadPosts() {
   const response = await fetchAdminPosts()
@@ -81,6 +148,22 @@ async function removeUser() {
     targetUser.value = null
     await loadPosts()
   }
+}
+
+function reviewPostCard(post) {
+  return {
+    id: post.postId,
+    authorId: post.authorId,
+    authorUsername: post.authorUsername,
+    content: post.content,
+    lastUpdatedAt: post.lastUpdatedAt,
+    commentCount: post.commentCount,
+    comments: []
+  }
+}
+
+function reviewComments(post) {
+  return Array.isArray(post.comments) ? post.comments : []
 }
 
 onMounted(loadPosts)

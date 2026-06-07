@@ -14,7 +14,19 @@ public class AdminService {
     }
 
     public List<AdminPostReview> reviewPosts() {
-        return adminMapper.selectReviewPosts();
+        return adminMapper.selectReviewPostRows().stream()
+            .map(row -> new AdminPostReview(
+                row.postId(),
+                row.authorId(),
+                row.authorUsername(),
+                row.content(),
+                row.status(),
+                row.createdAt(),
+                row.lastUpdatedAt(),
+                row.commentCount(),
+                adminMapper.selectComments(row.postId())
+            ))
+            .toList();
     }
 
     public AdminProfile profile(long adminId) {

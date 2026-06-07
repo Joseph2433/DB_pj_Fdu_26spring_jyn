@@ -462,6 +462,19 @@ h2 {
   box-shadow: 0 4px 14px rgba(32, 32, 29, 0.08);
 }
 
+.compact-segmented {
+  width: 168px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  flex: 0 0 auto;
+}
+
+.compact-segmented button {
+  min-height: 34px;
+  padding: 0 10px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
 .workspace-frame {
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr);
@@ -1037,6 +1050,12 @@ h2 {
   align-items: start;
 }
 
+.review-toolbar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .review-table {
   display: grid;
   gap: 12px;
@@ -1044,7 +1063,7 @@ h2 {
 
 .review-row {
   display: grid;
-  grid-template-columns: minmax(160px, 0.7fr) minmax(260px, 1.4fr) auto auto auto;
+  grid-template-columns: minmax(160px, 0.7fr) minmax(260px, 1.4fr) auto auto;
   gap: 12px;
   align-items: center;
   padding: 12px;
@@ -1054,12 +1073,100 @@ h2 {
   line-height: 1.6;
 }
 
+.review-card-feed {
+  gap: 14px;
+}
+
+.review-card-meta {
+  display: grid;
+  gap: 12px;
+}
+
+.review-status-pill {
+  justify-self: start;
+  border-color: rgba(122, 89, 43, 0.28);
+  background: rgba(201, 169, 97, 0.14);
+  color: var(--moss-dark);
+}
+
+.review-comment-panel {
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+
+.review-comment-panel-head,
+.review-comment-line {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.review-comment-panel-head {
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.review-comment-panel-head span,
+.review-comment-line small {
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.review-comment-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.review-comment-list li {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(246, 247, 241, 0.74);
+  padding: 10px;
+}
+
+.review-comment-line strong {
+  min-width: 0;
+  color: var(--ink);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.review-comment-list p,
+.review-comment-missing {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 .danger-zone {
   border-color: rgba(201, 86, 72, 0.45);
 }
 
 .profile-editor {
   max-width: 880px;
+}
+
+.profile-permission-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-top: 1px solid var(--line);
+  margin-top: 14px;
+  padding-top: 14px;
 }
 
 .empty-state {

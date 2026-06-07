@@ -1,5 +1,6 @@
 package com.fudan.lab5.admin;
 
+import com.fudan.lab5.post.CommentSummary;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
@@ -23,9 +24,18 @@ public interface AdminMapper {
           v.comment_count
         FROM admin_post_review_view v
         JOIN users u ON u.id = v.author_id
-        ORDER BY v.last_updated_at DESC
+        ORDER BY v.created_at DESC
         """)
-    List<AdminPostReview> selectReviewPosts();
+    List<AdminPostReviewRow> selectReviewPostRows();
+
+    @Select("""
+        SELECT c.id, c.author_id, u.username AS author_username, c.content, c.created_at
+        FROM comments c
+        JOIN users u ON u.id = c.author_id
+        WHERE c.post_id = #{postId}
+        ORDER BY c.created_at
+        """)
+    List<CommentSummary> selectComments(long postId);
 
     @Delete("DELETE FROM posts WHERE id = #{postId}")
     int deletePost(long postId);

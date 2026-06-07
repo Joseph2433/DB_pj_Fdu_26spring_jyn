@@ -5,7 +5,7 @@
         <p class="eyebrow">{{ mode === 'admin' ? 'Admin Profile' : 'User Profile' }}</p>
         <h2>{{ mode === 'admin' ? '管理员资料' : '个人资料' }}</h2>
       </div>
-      <button class="button primary" type="button" @click="saveProfile">
+      <button class="button primary" data-test="profile-save" type="button" @click="saveProfile">
         <Save class="button-icon" aria-hidden="true" />
         保存
       </button>
@@ -13,8 +13,12 @@
 
     <div class="form-grid" :class="{ 'single-column': mode === 'admin' }">
       <label>
+        {{ mode === 'admin' ? '管理员账号' : '账号' }}
+        <input data-test="profile-username" :value="profile.username" readonly />
+      </label>
+      <label>
         昵称
-        <input v-model="profile.displayName" />
+        <input data-test="profile-display-name" v-model="profile.displayName" />
       </label>
       <label v-if="mode === 'user'">
         性别
@@ -28,6 +32,11 @@
         年龄
         <input v-model.number="profile.age" type="number" min="0" max="150" />
       </label>
+    </div>
+
+    <div v-if="mode === 'admin'" class="profile-permission-strip">
+      <span class="meta-pill">审核与注销权限</span>
+      <span class="meta-pill">朋友圈内容管理</span>
     </div>
 
     <p v-if="message" :class="messageType">{{ message }}</p>
@@ -44,6 +53,7 @@ const props = defineProps({
 })
 
 const profile = reactive({
+  username: '',
   displayName: '',
   gender: '',
   birthday: '',
