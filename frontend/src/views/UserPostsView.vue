@@ -18,11 +18,25 @@
     >
       <template #actions>
         <div class="button-cluster post-owner-actions">
-          <button class="button ghost visibility-action" type="button" :data-test="`allow-post-${post.id}`" @click="openVisibility(post, 'ALLOW')">
+          <button
+            class="button ghost visibility-action"
+            type="button"
+            :data-test="`allow-post-${post.id}`"
+            :disabled="isVisibilityModeDisabled(post.id, 'ALLOW')"
+            :title="visibilityModeTitle(post.id, 'ALLOW')"
+            @click="openVisibility(post, 'ALLOW')"
+          >
             <Eye class="tiny-icon" aria-hidden="true" />
             设置可见
           </button>
-          <button class="button ghost visibility-action" type="button" :data-test="`deny-post-${post.id}`" @click="openVisibility(post, 'DENY')">
+          <button
+            class="button ghost visibility-action"
+            type="button"
+            :data-test="`deny-post-${post.id}`"
+            :disabled="isVisibilityModeDisabled(post.id, 'DENY')"
+            :title="visibilityModeTitle(post.id, 'DENY')"
+            @click="openVisibility(post, 'DENY')"
+          >
             <EyeOff class="tiny-icon" aria-hidden="true" />
             设置不可见
           </button>
@@ -172,6 +186,7 @@ import {
 const posts = ref([])
 const edits = reactive({})
 const editingPostId = ref(null)
+const postVisibilityRules = ref({})
 const groups = ref([])
 const friends = ref([])
 const visibilityRules = ref([])
@@ -194,6 +209,7 @@ async function loadPosts() {
   posts.value.forEach((post) => {
     edits[post.id] = post.content
   })
+  await loadPostVisibilityStates()
 }
 
 function startEdit(post) {
@@ -224,6 +240,9 @@ async function remove(postId) {
 }
 
 async function openVisibility(post, ruleType) {
+  if (isVisibilityModeDisabled(post.id, ruleType)) {
+    return
+  }
   visibilityPost.value = post
   visibilityRuleType.value = ruleType
   visibilityTargetType.value = 'GROUP'
@@ -242,6 +261,9 @@ async function openVisibility(post, ruleType) {
   groups.value = groupsResponse.success ? groupsResponse.data : []
   friends.value = friendsResponse.success ? friendsResponse.data : []
   visibilityRules.value = rulesResponse.success ? rulesResponse.data : []
+  if (rulesResponse.success) {
+    setPostVisibilityRules(post.id, rulesResponse.data)
+  }
   visibilityError.value = [groupsResponse, friendsResponse, rulesResponse]
     .find((response) => !response.success)?.message || ''
   syncSelectedVisibilityIds()
@@ -292,10 +314,55 @@ async function saveVisibility() {
   visibilitySaving.value = false
 
   if (response.success) {
+    await refreshPostVisibility(visibilityPost.value.id)
     closeVisibility()
     return
   }
   visibilityError.value = response.message || '可见范围保存失败'
+}
+
+async function loadPostVisibilityStates() {
+  const entries = await Promise.all(posts.value.map(async (post) => {
+    const response = await fetchPostVisibility(post.id)
+    return [post.id, response.success ? response.data : []]
+  }))
+  postVisibilityRules.value = Object.fromEntries(entries)
+}
+
+async function refreshPostVisibility(postId) {
+  const response = await fetchPostVisibility(postId)
+  if (response.success) {
+    setPostVisibilityRules(postId, response.data)
+  }
+  return response
+}
+
+function setPostVisibilityRules(postId, rules) {
+  postVisibilityRules.value = {
+    ...postVisibilityRules.value,
+    [postId]: rules
+  }
+}
+
+function postVisibilityMode(postId) {
+  const rules = postVisibilityRules.value[postId] || []
+  const hasAllow = rules.some((rule) => rule.ruleType === 'ALLOW')
+  const hasDeny = rules.some((rule) => rule.ruleType === 'DENY')
+  if (hasAllow) return 'ALLOW'
+  if (hasDeny) return 'DENY'
+  return ''
+}
+
+function isVisibilityModeDisabled(postId, ruleType) {
+  const mode = postVisibilityMode(postId)
+  return Boolean(mode && mode !== ruleType)
+}
+
+function visibilityModeTitle(postId, ruleType) {
+  if (!isVisibilityModeDisabled(postId, ruleType)) {
+    return ruleType === 'ALLOW' ? '设置可见范围' : '设置不可见范围'
+  }
+  return ruleType === 'ALLOW' ? '已设置不可见范围' : '已设置可见范围'
 }
 
 onMounted(loadPosts)

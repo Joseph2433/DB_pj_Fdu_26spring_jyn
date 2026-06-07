@@ -86,7 +86,7 @@ describe('UserPostsView', () => {
     expect(api.deletePost).toHaveBeenCalledWith(12)
   })
 
-  it('sets group allow visibility and friend deny visibility for my posts', async () => {
+  it('sets group allow visibility for my posts', async () => {
     const wrapper = mount(UserPostsView)
     await flushPromises()
 
@@ -105,18 +105,19 @@ describe('UserPostsView', () => {
       targetType: 'GROUP',
       targetIds: [7]
     })
+  })
 
-    await wrapper.find('[data-test="deny-post-12"]').trigger('click')
-    await flushPromises()
-    await wrapper.find('[data-test="visibility-tab-USER"]').trigger('click')
-    await wrapper.find('[data-test="visibility-target-USER-2"]').setValue(true)
-    await wrapper.find('[data-test="save-visibility"]').trigger('click')
-    await flushPromises()
-
-    expect(api.updatePostVisibility).toHaveBeenCalledWith(12, {
-      ruleType: 'DENY',
-      targetType: 'USER',
-      targetIds: [2]
+  it('disables the opposite visibility mode when a post already has one mode', async () => {
+    api.fetchPostVisibility.mockResolvedValue({
+      success: true,
+      data: [
+        { id: 1, postId: 12, ruleType: 'ALLOW', targetType: 'GROUP', targetId: 7, targetName: 'Project Team' }
+      ]
     })
+    const wrapper = mount(UserPostsView)
+    await flushPromises()
+
+    expect(wrapper.find('[data-test="allow-post-12"]').element.disabled).toBe(false)
+    expect(wrapper.find('[data-test="deny-post-12"]').element.disabled).toBe(true)
   })
 })

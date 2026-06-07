@@ -69,6 +69,7 @@ public class PostService {
         String targetType = normalizeOption(request.targetType(), List.of("GROUP", "USER"), "可见性对象");
         List<Long> targetIds = normalizeTargetIds(request.targetIds());
         validateTargets(userId, targetType, targetIds);
+        validateSingleVisibilityMode(postId, userId, ruleType, targetIds);
 
         postMapper.deleteVisibilityRules(postId, ruleType, targetType);
         if (!targetIds.isEmpty()) {
@@ -129,6 +130,16 @@ public class PostService {
             : postMapper.countFriendTargets(userId, targetIds);
         if (count != targetIds.size()) {
             throw new IllegalArgumentException("只能选择自己的分组或好友");
+        }
+    }
+
+    private void validateSingleVisibilityMode(long postId, long userId, String ruleType, List<Long> targetIds) {
+        if (targetIds.isEmpty()) {
+            return;
+        }
+        String oppositeRuleType = "ALLOW".equals(ruleType) ? "DENY" : "ALLOW";
+        if (postMapper.countVisibilityRulesByRuleType(postId, userId, oppositeRuleType) > 0) {
+            throw new IllegalArgumentException("一条动态只能设置可见或不可见其中一种");
         }
     }
 }

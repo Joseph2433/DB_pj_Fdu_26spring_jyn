@@ -294,6 +294,16 @@ public interface PostMapper {
         """)
     List<PostVisibilityRule> selectVisibilityRules(@Param("postId") long postId, @Param("authorId") long authorId);
 
+    @Select("""
+        SELECT COUNT(*)
+        FROM post_visibility_rules r
+        JOIN posts p ON p.id = r.post_id AND p.author_id = #{authorId}
+        WHERE r.post_id = #{postId}
+          AND r.rule_type = #{ruleType}
+        """)
+    int countVisibilityRulesByRuleType(@Param("postId") long postId, @Param("authorId") long authorId,
+                                       @Param("ruleType") String ruleType);
+
     @Delete("""
         DELETE FROM post_visibility_rules
         WHERE post_id = #{postId}

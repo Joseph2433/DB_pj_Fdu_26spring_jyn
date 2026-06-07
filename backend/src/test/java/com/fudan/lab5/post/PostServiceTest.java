@@ -111,6 +111,21 @@ class PostServiceTest {
     }
 
     @Test
+    void rejectsOppositeVisibilityModeWhenPostAlreadyHasRules() {
+        RecordingPostMapper mapper = new RecordingPostMapper();
+        mapper.oppositeVisibilityRuleCount = 1;
+        PostService service = new PostService(mapper);
+
+        assertThatThrownBy(() -> service.updateVisibility(1L, 12L, new PostVisibilityUpdateRequest("ALLOW", "USER", List.of(2L))))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("一条动态只能设置可见或不可见其中一种");
+
+        assertThat(mapper.oppositeCheckPostId).isEqualTo(12L);
+        assertThat(mapper.oppositeCheckAuthorId).isEqualTo(1L);
+        assertThat(mapper.oppositeCheckRuleType).isEqualTo("DENY");
+    }
+
+    @Test
     void commentsSqlIncludesAuthorUsername() throws NoSuchMethodException {
         Method method = PostMapper.class.getMethod("selectComments", long.class);
         String sql = String.join("\n", method.getAnnotation(Select.class).value());
@@ -123,6 +138,10 @@ class PostServiceTest {
         long friendViewerId;
         long friendAuthorId;
         int ownPostCount = 1;
+        int oppositeVisibilityRuleCount = 0;
+        long oppositeCheckPostId;
+        long oppositeCheckAuthorId;
+        String oppositeCheckRuleType;
         String deletedVisibilityRuleType;
         String deletedVisibilityTargetType;
         List<Long> insertedVisibilityTargetIds = new ArrayList<>();
@@ -193,6 +212,13 @@ class PostServiceTest {
         @Override
         public List<PostVisibilityRule> selectVisibilityRules(long postId, long authorId) {
             return List.of();
+        }
+
+        public int countVisibilityRulesByRuleType(long postId, long authorId, String ruleType) {
+            oppositeCheckPostId = postId;
+            oppositeCheckAuthorId = authorId;
+            oppositeCheckRuleType = ruleType;
+            return oppositeVisibilityRuleCount;
         }
 
         @Override
