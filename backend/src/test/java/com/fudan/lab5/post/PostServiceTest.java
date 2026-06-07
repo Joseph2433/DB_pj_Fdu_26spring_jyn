@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -77,6 +78,39 @@ class PostServiceTest {
     }
 
     @Test
+    void feedSqlAppliesPostVisibilityRules() throws NoSuchMethodException {
+        Method method = PostMapper.class.getMethod("selectFriendFeedRows", long.class, String.class);
+        String sql = String.join("\n", method.getAnnotation(Select.class).value());
+
+        assertThat(sql).contains("post_visibility_rules");
+        assertThat(sql).contains("rule_type = 'DENY'");
+        assertThat(sql).contains("rule_type = 'ALLOW'");
+    }
+
+    @Test
+    void updatesVisibilityRulesForOwnedPostTargets() {
+        RecordingPostMapper mapper = new RecordingPostMapper();
+        PostService service = new PostService(mapper);
+
+        service.updateVisibility(1L, 12L, new PostVisibilityUpdateRequest("ALLOW", "GROUP", List.of(7L, 8L)));
+
+        assertThat(mapper.deletedVisibilityRuleType).isEqualTo("ALLOW");
+        assertThat(mapper.deletedVisibilityTargetType).isEqualTo("GROUP");
+        assertThat(mapper.insertedVisibilityTargetIds).containsExactly(7L, 8L);
+    }
+
+    @Test
+    void rejectsVisibilityUpdateForSomeoneElsesPost() {
+        RecordingPostMapper mapper = new RecordingPostMapper();
+        mapper.ownPostCount = 0;
+        PostService service = new PostService(mapper);
+
+        assertThatThrownBy(() -> service.updateVisibility(1L, 12L, new PostVisibilityUpdateRequest("DENY", "USER", List.of(2L))))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("只能设置自己的朋友圈可见范围");
+    }
+
+    @Test
     void commentsSqlIncludesAuthorUsername() throws NoSuchMethodException {
         Method method = PostMapper.class.getMethod("selectComments", long.class);
         String sql = String.join("\n", method.getAnnotation(Select.class).value());
@@ -88,6 +122,10 @@ class PostServiceTest {
         String keyword;
         long friendViewerId;
         long friendAuthorId;
+        int ownPostCount = 1;
+        String deletedVisibilityRuleType;
+        String deletedVisibilityTargetType;
+        List<Long> insertedVisibilityTargetIds = new ArrayList<>();
 
         @Override
         public List<PostRow> selectFriendFeedRows(long userId, String keyword) {
@@ -135,6 +173,39 @@ class PostServiceTest {
         @Override
         public int countVisibleToUser(long postId, long userId) {
             return 1;
+        }
+
+        @Override
+        public int countOwnVisiblePost(long postId, long authorId) {
+            return ownPostCount;
+        }
+
+        @Override
+        public int countOwnedGroupTargets(long authorId, List<Long> targetIds) {
+            return targetIds.size();
+        }
+
+        @Override
+        public int countFriendTargets(long authorId, List<Long> targetIds) {
+            return targetIds.size();
+        }
+
+        @Override
+        public List<PostVisibilityRule> selectVisibilityRules(long postId, long authorId) {
+            return List.of();
+        }
+
+        @Override
+        public int deleteVisibilityRules(long postId, String ruleType, String targetType) {
+            deletedVisibilityRuleType = ruleType;
+            deletedVisibilityTargetType = targetType;
+            return 1;
+        }
+
+        @Override
+        public int insertVisibilityRules(long postId, String ruleType, String targetType, List<Long> targetIds) {
+            insertedVisibilityTargetIds = targetIds;
+            return targetIds.size();
         }
     }
 }
