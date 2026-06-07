@@ -417,7 +417,18 @@ h2 {
   position: relative;
 }
 
-.search-bar input {
+.search-field {
+  position: relative;
+  flex: 1 1 320px;
+  min-width: min(100%, 280px);
+}
+
+.search-field input {
+  min-width: 0;
+  padding-left: 38px;
+}
+
+.search-bar > input {
   min-width: 260px;
   padding-left: 38px;
 }
@@ -425,7 +436,14 @@ h2 {
 .search-icon {
   position: absolute;
   left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
   color: var(--muted);
+  pointer-events: none;
+}
+
+.search-bar > .search-icon {
+  top: 20px;
 }
 
 .hero-search {
@@ -435,7 +453,7 @@ h2 {
 
 .feed-masonry {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 18px;
   align-items: start;
 }
@@ -451,7 +469,7 @@ h2 {
 }
 
 .post-card-featured {
-  grid-row: span 2;
+  grid-row: auto;
   border-top: 6px solid var(--gold);
 }
 
@@ -759,12 +777,8 @@ h2 {
     flex-direction: column;
   }
 
-  .search-bar input {
+  .search-field {
     min-width: 0;
-  }
-
-  .search-icon {
-    top: 13px;
   }
 
   .draft-item {

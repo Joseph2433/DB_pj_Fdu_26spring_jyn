@@ -7,8 +7,10 @@
     </div>
 
     <form data-test="feed-search" class="search-bar hero-search" @submit.prevent="loadFeed">
-      <Search class="search-icon" aria-hidden="true" />
-      <input data-test="feed-keyword" v-model="keyword" placeholder="搜索正文或评论" aria-label="朋友圈关键词" />
+      <div class="search-field">
+        <Search class="search-icon" aria-hidden="true" />
+        <input data-test="feed-keyword" v-model="keyword" placeholder="搜索正文或评论" aria-label="朋友圈关键词" />
+      </div>
       <button class="button primary" type="submit">搜索</button>
       <button data-test="feed-clear" class="button ghost" type="button" @click="clearSearch">清空</button>
     </form>

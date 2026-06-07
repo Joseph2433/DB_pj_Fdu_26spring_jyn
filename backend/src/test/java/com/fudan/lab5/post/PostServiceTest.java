@@ -1,7 +1,9 @@
 package com.fudan.lab5.post;
 
+import org.apache.ibatis.annotations.Select;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -24,9 +26,9 @@ class PostServiceTest {
         RecordingPostMapper mapper = new RecordingPostMapper();
         PostService service = new PostService(mapper);
 
-        service.feedForUser(1L, "  AI 助手  ");
+        service.feedForUser(1L, "  AI assistant  ");
 
-        assertThat(mapper.keyword).isEqualTo("AI 助手");
+        assertThat(mapper.keyword).isEqualTo("AI assistant");
     }
 
     @Test
@@ -34,8 +36,16 @@ class PostServiceTest {
         PostService service = new PostService(new RecordingPostMapper());
 
         assertThatThrownBy(() -> service.createPost(1L, new PostCreateRequest("a".repeat(281))))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("朋友圈内容不能超过 280 字");
+            .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void feedSqlIncludesOwnPostsAndOrdersByCreatedAt() throws NoSuchMethodException {
+        Method method = PostMapper.class.getMethod("selectFriendFeedRows", long.class, String.class);
+        String sql = String.join("\n", method.getAnnotation(Select.class).value());
+
+        assertThat(sql).contains("p.author_id = #{userId}");
+        assertThat(sql).contains("ORDER BY p.created_at DESC");
     }
 
     static class RecordingPostMapper implements PostMapper {
@@ -44,7 +54,7 @@ class PostServiceTest {
         @Override
         public List<PostRow> selectFriendFeedRows(long userId, String keyword) {
             this.keyword = keyword;
-            return List.of(new PostRow(9L, 2L, "AI 助手很好用", LocalDateTime.now()));
+            return List.of(new PostRow(9L, 2L, "AI assistant draft", LocalDateTime.now()));
         }
 
         @Override

@@ -12,22 +12,23 @@ import java.util.List;
 @Mapper
 public interface PostMapper {
     @Select("""
-        SELECT DISTINCT
+        SELECT
           p.id,
           p.author_id,
           p.content,
           p.last_updated_at
         FROM posts p
-        JOIN friendships f ON f.friend_id = p.author_id
+        LEFT JOIN friendships f ON f.owner_id = #{userId} AND f.friend_id = p.author_id
         LEFT JOIN comments c ON c.post_id = p.id
-        WHERE f.owner_id = #{userId}
-          AND p.status = 'VISIBLE'
+        WHERE p.status = 'VISIBLE'
+          AND (p.author_id = #{userId} OR f.id IS NOT NULL)
           AND (
             #{keyword} IS NULL
             OR p.content LIKE CONCAT('%', #{keyword}, '%')
             OR c.content LIKE CONCAT('%', #{keyword}, '%')
           )
-        ORDER BY p.last_updated_at DESC
+        GROUP BY p.id, p.author_id, p.content, p.last_updated_at, p.created_at
+        ORDER BY p.created_at DESC
         """)
     List<PostRow> selectFriendFeedRows(@Param("userId") long userId, @Param("keyword") String keyword);
 
@@ -35,7 +36,7 @@ public interface PostMapper {
         SELECT id, author_id, content, last_updated_at
         FROM posts
         WHERE author_id = #{userId} AND status = 'VISIBLE'
-        ORDER BY last_updated_at DESC
+        ORDER BY created_at DESC
         """)
     List<PostRow> selectMyPostRows(long userId);
 
