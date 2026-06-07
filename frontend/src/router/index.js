@@ -3,6 +3,7 @@ import LoginView from '../views/LoginView.vue'
 import UserLayoutView from '../views/UserLayoutView.vue'
 import UserFeedView from '../views/UserFeedView.vue'
 import UserComposeView from '../views/UserComposeView.vue'
+import UserFriendPostsView from '../views/UserFriendPostsView.vue'
 import UserPostsView from '../views/UserPostsView.vue'
 import UserFriendsView from '../views/UserFriendsView.vue'
 import UserProfileView from '../views/UserProfileView.vue'
@@ -23,6 +24,7 @@ export default createRouter({
         { path: 'compose', component: UserComposeView },
         { path: 'posts', component: UserPostsView },
         { path: 'friends', component: UserFriendsView },
+        { path: 'friends/:friendId/posts', component: UserFriendPostsView },
         { path: 'profile', component: UserProfileView }
       ]
     },

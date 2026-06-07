@@ -758,6 +758,27 @@ h2 {
   min-width: 0;
 }
 
+.friend-profile-link {
+  margin: -4px;
+  padding: 4px;
+  border-radius: 8px;
+  color: inherit;
+  text-decoration: none;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.friend-profile-link:hover,
+.friend-profile-link:focus-visible {
+  background: rgba(47, 111, 85, 0.08);
+  outline: none;
+  transform: translateX(2px);
+}
+
+.friend-profile-link:hover .author-avatar,
+.friend-profile-link:focus-visible .author-avatar {
+  background: #dfe9dc;
+}
+
 .friend-person strong {
   font-size: 15px;
 }

@@ -92,6 +92,11 @@ export async function fetchMyPosts() {
   return data
 }
 
+export async function fetchFriendPosts(friendId) {
+  const { data } = await http.get(`/posts/friends/${friendId}`)
+  return data
+}
+
 export async function generatePostDrafts(payload) {
   const { data } = await http.post('/ai/post-drafts', payload)
   return data

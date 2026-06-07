@@ -25,6 +25,10 @@ public class PostService {
         return withComments(postMapper.selectMyPostRows(userId));
     }
 
+    public List<PostSummary> friendPosts(long userId, long friendId) {
+        return withComments(postMapper.selectFriendPostRows(userId, friendId));
+    }
+
     @Transactional
     public void createPost(long userId, PostCreateRequest request) {
         postMapper.insertPost(userId, validateText(request.content(), POST_LIMIT, "朋友圈内容"));

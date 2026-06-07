@@ -32,6 +32,26 @@ function mockDirectoryData() {
   })
 }
 
+const RouterLinkStub = {
+  props: ['to'],
+  computed: {
+    href() {
+      return typeof this.to === 'string' ? this.to : this.to.path
+    }
+  },
+  template: '<a v-bind="$attrs" :href="href"><slot /></a>'
+}
+
+function mountFriendsView() {
+  return mount(UserFriendsView, {
+    global: {
+      stubs: {
+        RouterLink: RouterLinkStub
+      }
+    }
+  })
+}
+
 describe('UserFriendsView', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -48,7 +68,7 @@ describe('UserFriendsView', () => {
   })
 
   it('creates a group, searches users, adds a friend, and moves a friend', async () => {
-    const wrapper = mount(UserFriendsView)
+    const wrapper = mountFriendsView()
     await flushPromises()
 
     await wrapper.find('[data-test="group-name"]').setValue('Lab partners')
@@ -71,7 +91,7 @@ describe('UserFriendsView', () => {
   })
 
   it('deletes a group and refreshes the friend directory', async () => {
-    const wrapper = mount(UserFriendsView)
+    const wrapper = mountFriendsView()
     await flushPromises()
 
     await wrapper.find('[data-test="delete-group-5"]').trigger('click')
@@ -83,7 +103,7 @@ describe('UserFriendsView', () => {
   })
 
   it('filters friends by the selected group', async () => {
-    const wrapper = mount(UserFriendsView)
+    const wrapper = mountFriendsView()
     await flushPromises()
 
     await wrapper.find('[data-test="friend-group-filter"]').setValue('5')
@@ -97,5 +117,15 @@ describe('UserFriendsView', () => {
     expect(wrapper.text()).not.toContain('Bob')
     expect(wrapper.text()).toContain('Dana')
     expect(wrapper.text()).not.toContain('Evan')
+  })
+
+  it('links each friend to that friend posts page', async () => {
+    const wrapper = mountFriendsView()
+    await flushPromises()
+
+    const link = wrapper.find('[data-test="friend-link-2"]')
+
+    expect(link.attributes('href')).toBe('/user/friends/2/posts')
+    expect(link.text()).toContain('Bob')
   })
 })

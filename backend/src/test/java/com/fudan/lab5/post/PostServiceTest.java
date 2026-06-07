@@ -48,8 +48,35 @@ class PostServiceTest {
         assertThat(sql).contains("ORDER BY p.created_at DESC");
     }
 
+    @Test
+    void loadsVisiblePostsForOneFriendWithComments() {
+        RecordingPostMapper mapper = new RecordingPostMapper();
+        PostService service = new PostService(mapper);
+
+        List<PostSummary> result = service.friendPosts(1L, 2L);
+
+        assertThat(mapper.friendViewerId).isEqualTo(1L);
+        assertThat(mapper.friendAuthorId).isEqualTo(2L);
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst().authorId()).isEqualTo(2L);
+        assertThat(result.getFirst().comments()).isEmpty();
+    }
+
+    @Test
+    void friendPostsSqlRequiresFriendshipAndOrdersByCreatedAt() throws NoSuchMethodException {
+        Method method = PostMapper.class.getMethod("selectFriendPostRows", long.class, long.class);
+        String sql = String.join("\n", method.getAnnotation(Select.class).value());
+
+        assertThat(sql).contains("p.author_id = #{friendId}");
+        assertThat(sql).contains("f.owner_id = #{userId}");
+        assertThat(sql).contains("f.friend_id = #{friendId}");
+        assertThat(sql).contains("ORDER BY p.created_at DESC");
+    }
+
     static class RecordingPostMapper implements PostMapper {
         String keyword;
+        long friendViewerId;
+        long friendAuthorId;
 
         @Override
         public List<PostRow> selectFriendFeedRows(long userId, String keyword) {
@@ -60,6 +87,13 @@ class PostServiceTest {
         @Override
         public List<PostRow> selectMyPostRows(long userId) {
             return List.of();
+        }
+
+        @Override
+        public List<PostRow> selectFriendPostRows(long userId, long friendId) {
+            this.friendViewerId = userId;
+            this.friendAuthorId = friendId;
+            return List.of(new PostRow(11L, friendId, "Friend post", LocalDateTime.now()));
         }
 
         @Override

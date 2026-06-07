@@ -41,6 +41,21 @@ public interface PostMapper {
     List<PostRow> selectMyPostRows(long userId);
 
     @Select("""
+        SELECT p.id, p.author_id, p.content, p.last_updated_at
+        FROM posts p
+        WHERE p.author_id = #{friendId}
+          AND p.status = 'VISIBLE'
+          AND EXISTS (
+            SELECT 1
+            FROM friendships f
+            WHERE f.owner_id = #{userId}
+              AND f.friend_id = #{friendId}
+          )
+        ORDER BY p.created_at DESC
+        """)
+    List<PostRow> selectFriendPostRows(@Param("userId") long userId, @Param("friendId") long friendId);
+
+    @Select("""
         SELECT id, author_id, content, created_at
         FROM comments
         WHERE post_id = #{postId}

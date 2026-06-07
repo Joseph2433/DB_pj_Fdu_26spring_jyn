@@ -85,13 +85,17 @@
 
       <div class="friend-table">
         <article v-for="friend in filteredFriends" :key="friend.friendshipId" class="friend-row">
-          <div class="friend-person">
+          <RouterLink
+            class="friend-person friend-profile-link"
+            :to="friendPostsLink(friend)"
+            :data-test="`friend-link-${friend.friendId}`"
+          >
             <span class="author-avatar">{{ friend.friendId }}</span>
             <span>
               <strong>{{ friend.displayName }}</strong>
               <small>{{ friend.username }} · {{ friend.groupName || '未分组' }}</small>
             </span>
-          </div>
+          </RouterLink>
           <select
             :data-test="`friend-group-${friend.friendId}`"
             :value="friend.groupId ?? ''"
@@ -195,6 +199,16 @@ function normalizeFriendGroupFilter() {
   if (selectedFriendGroup.value === '__all__' || selectedFriendGroup.value === '__ungrouped__') return
   const groupStillExists = groups.value.some((group) => String(group.id) === selectedFriendGroup.value)
   if (!groupStillExists) selectedFriendGroup.value = '__all__'
+}
+
+function friendPostsLink(friend) {
+  return {
+    path: `/user/friends/${friend.friendId}/posts`,
+    query: {
+      name: friend.displayName,
+      username: friend.username
+    }
+  }
 }
 
 onMounted(loadAll)
