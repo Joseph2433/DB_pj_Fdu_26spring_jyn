@@ -460,6 +460,7 @@ h2 {
 
 .post-card {
   display: grid;
+  min-width: 0;
   gap: 16px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -504,6 +505,10 @@ h2 {
   font-family: "Noto Serif SC", "Source Han Serif SC", serif;
   font-size: 20px;
   line-height: 1.85;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .comment-list,
@@ -523,9 +528,16 @@ h2 {
 
 .comment-list li {
   display: grid;
+  min-width: 0;
   gap: 4px;
   color: var(--muted);
   font-size: 13px;
+}
+
+.comment-list span {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .comment-list strong {
