@@ -122,6 +122,16 @@ export async function fetchFriendPosts(friendId) {
   return data
 }
 
+export async function fetchPostVisibility(postId) {
+  const { data } = await http.get(`/posts/${postId}/visibility`)
+  return data
+}
+
+export async function updatePostVisibility(postId, payload) {
+  const { data } = await http.put(`/posts/${postId}/visibility`, payload)
+  return data
+}
+
 export async function generatePostDrafts(payload) {
   const { data } = await http.post('/ai/post-drafts', payload)
   return data

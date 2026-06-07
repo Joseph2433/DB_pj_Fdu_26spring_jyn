@@ -4,6 +4,7 @@ USE lab5_social;
 DROP VIEW IF EXISTS admin_post_review_view;
 DROP TABLE IF EXISTS post_audit_logs;
 DROP TABLE IF EXISTS comments;
+DROP TABLE IF EXISTS post_visibility_rules;
 DROP TABLE IF EXISTS posts;
 DROP TABLE IF EXISTS friend_requests;
 DROP TABLE IF EXISTS friendships;
@@ -82,6 +83,19 @@ CREATE TABLE posts (
   CONSTRAINT chk_posts_content_length CHECK (CHAR_LENGTH(content) BETWEEN 1 AND 280)
 );
 
+CREATE TABLE post_visibility_rules (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  post_id BIGINT NOT NULL,
+  rule_type VARCHAR(10) NOT NULL,
+  target_type VARCHAR(10) NOT NULL,
+  target_id BIGINT NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_post_visibility_rules_post FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+  CONSTRAINT chk_post_visibility_rules_rule_type CHECK (rule_type IN ('ALLOW', 'DENY')),
+  CONSTRAINT chk_post_visibility_rules_target_type CHECK (target_type IN ('GROUP', 'USER')),
+  CONSTRAINT uk_post_visibility_rules_target UNIQUE (post_id, rule_type, target_type, target_id)
+);
+
 CREATE TABLE comments (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   post_id BIGINT NOT NULL,
@@ -104,6 +118,7 @@ CREATE TABLE post_audit_logs (
 
 CREATE INDEX idx_posts_author_updated ON posts(author_id, last_updated_at DESC);
 CREATE INDEX idx_posts_content ON posts(content);
+CREATE INDEX idx_post_visibility_rules_post ON post_visibility_rules(post_id, rule_type, target_type);
 CREATE INDEX idx_comments_post_created ON comments(post_id, created_at);
 CREATE INDEX idx_comments_content ON comments(content);
 CREATE INDEX idx_friendships_owner ON friendships(owner_id);

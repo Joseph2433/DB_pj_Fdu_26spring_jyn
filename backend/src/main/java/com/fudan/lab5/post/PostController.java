@@ -59,6 +59,18 @@ public class PostController {
         return ApiResponse.ok(null);
     }
 
+    @GetMapping("/{postId}/visibility")
+    public ApiResponse<List<PostVisibilityRule>> visibility(@PathVariable long postId, HttpSession session) {
+        return ApiResponse.ok(postService.visibilityRules(currentSession.requireUserId(session), postId));
+    }
+
+    @PutMapping("/{postId}/visibility")
+    public ApiResponse<Void> updateVisibility(@PathVariable long postId, @RequestBody PostVisibilityUpdateRequest request,
+                                              HttpSession session) {
+        postService.updateVisibility(currentSession.requireUserId(session), postId, request);
+        return ApiResponse.ok(null);
+    }
+
     @PostMapping("/{postId}/comments")
     public ApiResponse<Void> comment(@PathVariable long postId, @RequestBody CommentCreateRequest request, HttpSession session) {
         postService.comment(currentSession.requireUserId(session), postId, request);
