@@ -37,7 +37,23 @@ class FriendServiceTest {
         assertThat(mapper.acceptedRequestId).isEqualTo(20L);
     }
 
+    @Test
+    void deletingFriendRemovesFriendshipRowsForBothUsers() {
+        RecordingFriendMapper mapper = new RecordingFriendMapper();
+        FriendService service = new FriendService(mapper);
+
+        service.deleteFriend(1L, 2L);
+
+        assertThat(mapper.friendshipDeletes).containsExactly(
+            new FriendshipDelete(1L, 2L),
+            new FriendshipDelete(2L, 1L)
+        );
+    }
+
     record FriendshipInsert(long ownerId, long friendId, Long groupId) {
+    }
+
+    record FriendshipDelete(long ownerId, long friendId) {
     }
 
     static class RecordingFriendMapper implements FriendMapper {
@@ -47,6 +63,7 @@ class FriendServiceTest {
         long acceptedRequestId;
         FriendRequestRow pendingRequest;
         List<FriendshipInsert> friendshipInserts = new ArrayList<>();
+        List<FriendshipDelete> friendshipDeletes = new ArrayList<>();
 
         @Override
         public List<FriendGroup> selectGroups(long userId) {
@@ -86,6 +103,7 @@ class FriendServiceTest {
 
         @Override
         public int deleteFriend(long ownerId, long friendId) {
+            friendshipDeletes.add(new FriendshipDelete(ownerId, friendId));
             return 1;
         }
 

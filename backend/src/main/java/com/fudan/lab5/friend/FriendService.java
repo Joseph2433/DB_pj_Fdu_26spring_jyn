@@ -99,6 +99,7 @@ public class FriendService {
         if (friendMapper.deleteFriend(userId, friendId) == 0) {
             throw new IllegalArgumentException("好友关系不存在");
         }
+        friendMapper.deleteFriend(friendId, userId);
     }
 
     @Transactional
