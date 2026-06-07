@@ -1,14 +1,17 @@
 <template>
-  <section class="tool-panel ai-panel">
-    <div class="panel-heading">
-      <h2>AI 文案助手</h2>
-      <span>草稿不会自动发布</span>
-    </div>
+  <section class="tool-surface ai-panel">
+    <header class="panel-heading">
+      <div>
+        <p class="eyebrow">DeepSeek Assistant</p>
+        <h2>AI 文案助手</h2>
+      </div>
+      <Sparkles class="panel-icon" aria-hidden="true" />
+    </header>
 
-    <div class="form-grid compact">
+    <div class="form-grid three-columns">
       <label>
         主题
-        <input name="topic" v-model="topic" aria-label="主题，例如数据库实验或周末复习" />
+        <input name="topic" v-model="topic" placeholder="例如：数据库实验复盘" />
       </label>
       <label>
         语气
@@ -28,16 +31,20 @@
       </label>
     </div>
 
-    <button data-test="generate" class="primary" :disabled="loading" @click="handleGenerate">
-      {{ loading ? '生成中...' : '生成文案' }}
-    </button>
+    <div class="action-row">
+      <button data-test="generate" class="button primary" type="button" :disabled="loading" @click="handleGenerate">
+        <Sparkles class="button-icon" aria-hidden="true" />
+        {{ loading ? '生成中' : '生成文案' }}
+      </button>
+      <p v-if="error" class="error-message">{{ error }}</p>
+    </div>
 
-    <p v-if="error" class="error">{{ error }}</p>
-
-    <ul class="draft-list">
-      <li v-for="draft in drafts" :key="draft">
+    <ul v-if="drafts.length" class="draft-list">
+      <li v-for="draft in drafts" :key="draft" class="draft-item">
         <p>{{ draft }}</p>
-        <button data-test="use-draft" @click="$emit('select-draft', draft)">填入发布框</button>
+        <button data-test="use-draft" class="button ghost" type="button" @click="$emit('select-draft', draft)">
+          采用
+        </button>
       </li>
     </ul>
   </section>
@@ -45,6 +52,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import { Sparkles } from 'lucide-vue-next'
 
 const props = defineProps({
   generate: { type: Function, required: true }
@@ -65,10 +73,11 @@ async function handleGenerate() {
     error.value = '主题不能为空'
     return
   }
+
   loading.value = true
   try {
     const response = await props.generate({
-      topic: topic.value,
+      topic: topic.value.trim(),
       tone: tone.value,
       lengthPreference: lengthPreference.value
     })
@@ -76,7 +85,7 @@ async function handleGenerate() {
       error.value = response.message || 'AI 生成失败'
       return
     }
-    drafts.value = response.data.drafts
+    drafts.value = response.data?.drafts || []
   } catch {
     error.value = 'AI 生成失败，不影响手动发布'
   } finally {
