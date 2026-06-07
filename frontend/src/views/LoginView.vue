@@ -20,30 +20,50 @@
         <span><Sparkles class="tiny-icon" aria-hidden="true" />AI 文案</span>
       </div>
 
-      <div class="login-preview" aria-hidden="true">
-        <div class="preview-topline">
-          <span>今日动态</span>
-          <strong>12 条更新</strong>
-        </div>
-        <article class="preview-post">
-          <div class="author-block">
-            <span class="author-avatar">A</span>
-            <span>
-              <strong>Alice</strong>
-              <small>刚刚发布</small>
-            </span>
+      <div class="login-showcase">
+        <section class="showcase-panel showcase-flow">
+          <div class="showcase-heading">
+            <p class="eyebrow">Demo Flow</p>
+            <h2>演示流程</h2>
           </div>
-          <p>数据库 Lab5 收尾：朋友圈搜索、分组管理和 AI 文案助手都跑通了。</p>
-          <div class="preview-comment">
-            <MessageCircle class="tiny-icon" aria-hidden="true" />
-            Bob 回复：演示路径很清楚
+          <ol>
+            <li>
+              <span>01</span>
+              <strong>用户登录</strong>
+              <small>进入好友、分组和个人信息工作台</small>
+            </li>
+            <li>
+              <span>02</span>
+              <strong>朋友圈互动</strong>
+              <small>发布动态、搜索内容、评论与回复</small>
+            </li>
+            <li>
+              <span>03</span>
+              <strong>AI 文案助手</strong>
+              <small>生成候选文案，再由用户确认发布</small>
+            </li>
+            <li>
+              <span>04</span>
+              <strong>管理员审核</strong>
+              <small>完成动态审核与注销流程演示</small>
+            </li>
+          </ol>
+        </section>
+
+        <section class="showcase-panel showcase-schema">
+          <div class="showcase-heading">
+            <p class="eyebrow">Database Objects</p>
+            <h2>核心数据</h2>
           </div>
-        </article>
-        <div class="preview-metrics">
-          <span><strong>8</strong> 好友</span>
-          <span><strong>4</strong> 分组</span>
-          <span><strong>3</strong> 待审核</span>
-        </div>
+          <div class="schema-grid" aria-label="核心数据表">
+            <span>users</span>
+            <span>friendships</span>
+            <span>friend_groups</span>
+            <span>posts</span>
+            <span>comments</span>
+            <span>audit_logs</span>
+          </div>
+        </section>
       </div>
     </section>
 
@@ -93,8 +113,8 @@ const route = useRoute()
 const mode = ref('user')
 const message = ref('')
 const form = reactive({
-  username: 'alice',
-  password: '123456',
+  username: '',
+  password: '',
   displayName: ''
 })
 

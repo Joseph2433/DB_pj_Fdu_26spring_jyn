@@ -36,9 +36,20 @@ public class FriendController {
         return ApiResponse.ok(friendService.friends(currentSession.requireUserId(session)));
     }
 
+    @GetMapping("/api/friend-requests")
+    public ApiResponse<List<FriendRequestView>> friendRequests(HttpSession session) {
+        return ApiResponse.ok(friendService.friendRequests(currentSession.requireUserId(session)));
+    }
+
     @PostMapping("/api/friends")
     public ApiResponse<Void> addFriend(@RequestBody FriendRequest request, HttpSession session) {
         friendService.addFriend(currentSession.requireUserId(session), request);
+        return ApiResponse.ok(null);
+    }
+
+    @PostMapping("/api/friend-requests/{requestId}/accept")
+    public ApiResponse<Void> acceptFriendRequest(@PathVariable long requestId, HttpSession session) {
+        friendService.acceptFriendRequest(currentSession.requireUserId(session), requestId);
         return ApiResponse.ok(null);
     }
 

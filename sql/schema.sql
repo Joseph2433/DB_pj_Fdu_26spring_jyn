@@ -5,6 +5,7 @@ DROP VIEW IF EXISTS admin_post_review_view;
 DROP TABLE IF EXISTS post_audit_logs;
 DROP TABLE IF EXISTS comments;
 DROP TABLE IF EXISTS posts;
+DROP TABLE IF EXISTS friend_requests;
 DROP TABLE IF EXISTS friendships;
 DROP TABLE IF EXISTS friend_groups;
 DROP TABLE IF EXISTS admins;
@@ -55,6 +56,22 @@ CREATE TABLE friendships (
   CONSTRAINT chk_friendships_not_self CHECK (owner_id <> friend_id)
 );
 
+CREATE TABLE friend_requests (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  requester_id BIGINT NOT NULL,
+  receiver_id BIGINT NOT NULL,
+  requester_group_id BIGINT,
+  status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  responded_at DATETIME,
+  CONSTRAINT fk_friend_requests_requester FOREIGN KEY (requester_id) REFERENCES users(id) ON DELETE CASCADE,
+  CONSTRAINT fk_friend_requests_receiver FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE,
+  CONSTRAINT fk_friend_requests_group FOREIGN KEY (requester_group_id) REFERENCES friend_groups(id) ON DELETE SET NULL,
+  CONSTRAINT uk_friend_requests_pair_status UNIQUE (requester_id, receiver_id, status),
+  CONSTRAINT chk_friend_requests_not_self CHECK (requester_id <> receiver_id),
+  CONSTRAINT chk_friend_requests_status CHECK (status IN ('PENDING', 'ACCEPTED'))
+);
+
 CREATE TABLE posts (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   author_id BIGINT NOT NULL,
@@ -91,6 +108,7 @@ CREATE INDEX idx_posts_content ON posts(content);
 CREATE INDEX idx_comments_post_created ON comments(post_id, created_at);
 CREATE INDEX idx_comments_content ON comments(content);
 CREATE INDEX idx_friendships_owner ON friendships(owner_id);
+CREATE INDEX idx_friend_requests_receiver_status ON friend_requests(receiver_id, status, created_at);
 
 CREATE VIEW admin_post_review_view AS
 SELECT

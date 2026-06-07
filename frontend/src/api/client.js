@@ -52,6 +52,11 @@ export async function fetchFriends() {
   return data
 }
 
+export async function fetchFriendRequests() {
+  const { data } = await http.get('/friend-requests')
+  return data
+}
+
 export async function fetchGroups() {
   const { data } = await http.get('/friend-groups')
   return data
@@ -69,6 +74,11 @@ export async function deleteGroup(groupId) {
 
 export async function addFriend(friendId, groupId = null) {
   const { data } = await http.post('/friends', { friendId, groupId })
+  return data
+}
+
+export async function acceptFriendRequest(requestId) {
+  const { data } = await http.post(`/friend-requests/${requestId}/accept`)
   return data
 }
 

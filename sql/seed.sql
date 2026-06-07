@@ -16,7 +16,8 @@ INSERT INTO friend_groups (user_id, name) VALUES
 INSERT INTO friendships (owner_id, friend_id, group_id) VALUES
 (1, 2, 1),
 (1, 3, 2),
-(2, 1, 3);
+(2, 1, 3),
+(3, 1, NULL);
 
 INSERT INTO posts (author_id, content) VALUES
 (2, 'Today I finished the Lab5 backend API. The keyword search works well.'),

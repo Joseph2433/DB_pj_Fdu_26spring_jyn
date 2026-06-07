@@ -4,10 +4,12 @@ import UserFriendsView from './UserFriendsView.vue'
 import * as api from '../api/client'
 
 vi.mock('../api/client', () => ({
+  acceptFriendRequest: vi.fn(),
   addFriend: vi.fn(),
   createGroup: vi.fn(),
   deleteFriend: vi.fn(),
   deleteGroup: vi.fn(),
+  fetchFriendRequests: vi.fn(),
   fetchFriends: vi.fn(),
   fetchGroups: vi.fn(),
   moveFriend: vi.fn(),
@@ -62,12 +64,14 @@ describe('UserFriendsView', () => {
       data: [{ id: 3, username: 'cathy', displayName: 'Cathy' }]
     })
     api.addFriend.mockResolvedValue({ success: true })
+    api.acceptFriendRequest.mockResolvedValue({ success: true })
+    api.fetchFriendRequests.mockResolvedValue({ success: true, data: [] })
     api.moveFriend.mockResolvedValue({ success: true })
     api.deleteFriend.mockResolvedValue({ success: true })
     api.deleteGroup.mockResolvedValue({ success: true })
   })
 
-  it('creates a group, searches users, adds a friend, and moves a friend', async () => {
+  it('creates a group, searches users, sends a friend request, and moves a friend', async () => {
     const wrapper = mountFriendsView()
     await flushPromises()
 
@@ -88,6 +92,37 @@ describe('UserFriendsView', () => {
     await wrapper.find('[data-test="friend-group-2"]').setValue('5')
     await flushPromises()
     expect(api.moveFriend).toHaveBeenCalledWith(2, 5)
+  })
+
+  it('shows pending friend requests in a dialog and accepts one', async () => {
+    api.fetchFriendRequests.mockResolvedValue({
+      success: true,
+      data: [{ id: 20, requesterId: 3, username: 'cathy', displayName: 'Cathy', createdAt: '2026-06-07T10:00:00' }]
+    })
+    const wrapper = mountFriendsView()
+    await flushPromises()
+
+    expect(wrapper.find('[data-test="friend-request-button"]').text()).toContain('1')
+    expect(wrapper.text()).toContain('好友申请')
+    expect(wrapper.text()).toContain('Cathy')
+
+    await wrapper.find('[data-test="accept-friend-request-20"]').trigger('click')
+    await flushPromises()
+
+    expect(api.acceptFriendRequest).toHaveBeenCalledWith(20)
+    expect(api.fetchFriends).toHaveBeenCalledTimes(2)
+  })
+
+  it('surfaces friend request endpoint failures instead of hiding them', async () => {
+    api.fetchFriendRequests.mockResolvedValue({
+      success: false,
+      message: '系统错误：No static resource api/friend-requests.'
+    })
+    const wrapper = mountFriendsView()
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('好友申请接口异常')
+    expect(wrapper.text()).toContain('No static resource api/friend-requests')
   })
 
   it('deletes a group and refreshes the friend directory', async () => {
