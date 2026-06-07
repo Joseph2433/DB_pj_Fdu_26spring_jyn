@@ -62,6 +62,11 @@ export async function createGroup(name) {
   return data
 }
 
+export async function deleteGroup(groupId) {
+  const { data } = await http.delete(`/friend-groups/${groupId}`)
+  return data
+}
+
 export async function addFriend(friendId, groupId = null) {
   const { data } = await http.post('/friends', { friendId, groupId })
   return data

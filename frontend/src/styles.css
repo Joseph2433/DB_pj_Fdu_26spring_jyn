@@ -229,6 +229,27 @@ h2 {
   font-size: 13px;
 }
 
+.managed-group-chip {
+  padding: 5px 6px 5px 10px;
+}
+
+.chip-icon-button {
+  display: inline-grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--coral);
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.chip-icon-button:hover {
+  background: rgba(201, 86, 72, 0.11);
+  transform: translateY(-1px);
+}
+
 .login-panel,
 .tool-surface {
   border: 1px solid var(--line);
@@ -597,6 +618,19 @@ h2 {
   font-size: 13px;
 }
 
+.friend-panel-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.friend-panel-tools select {
+  width: min(220px, 42vw);
+  min-width: 160px;
+}
+
 .draft-item,
 .search-results li,
 .friend-row,
@@ -795,5 +829,14 @@ h2 {
 
   .draft-item {
     grid-template-columns: 1fr;
+  }
+
+  .friend-panel-tools {
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .friend-panel-tools select {
+    width: 100%;
   }
 }
