@@ -35,7 +35,7 @@ async function loadProfile() {
 
 async function goLogout() {
   await logout()
-  router.push('/')
+  router.push('/login')
 }
 
 onMounted(loadProfile)

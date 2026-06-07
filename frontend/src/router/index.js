@@ -10,15 +10,18 @@ import UserProfileView from '../views/UserProfileView.vue'
 import AdminLayoutView from '../views/AdminLayoutView.vue'
 import AdminReviewView from '../views/AdminReviewView.vue'
 import AdminProfileView from '../views/AdminProfileView.vue'
+import { getAdminMe, getMe } from '../api/client'
 
-export default createRouter({
+const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '/', component: LoginView },
+    { path: '/', redirect: '/login' },
+    { path: '/login', component: LoginView },
     {
       path: '/user',
       component: UserLayoutView,
       redirect: '/user/feed',
+      meta: { requiresAuth: 'user' },
       children: [
         { path: 'feed', component: UserFeedView },
         { path: 'compose', component: UserComposeView },
@@ -32,6 +35,7 @@ export default createRouter({
       path: '/admin',
       component: AdminLayoutView,
       redirect: '/admin/review',
+      meta: { requiresAuth: 'admin' },
       children: [
         { path: 'review', component: AdminReviewView },
         { path: 'profile', component: AdminProfileView }
@@ -39,3 +43,15 @@ export default createRouter({
     }
   ]
 })
+
+router.beforeEach(async (to) => {
+  const requiredAuth = to.matched.find((route) => route.meta.requiresAuth)?.meta.requiresAuth
+  if (!requiredAuth) return true
+
+  const response = requiredAuth === 'admin' ? await getAdminMe() : await getMe()
+  if (response.success) return true
+
+  return { path: '/login', query: { redirect: to.fullPath } }
+})
+
+export default router
