@@ -67,7 +67,6 @@ CREATE TABLE friend_requests (
   CONSTRAINT fk_friend_requests_requester FOREIGN KEY (requester_id) REFERENCES users(id) ON DELETE CASCADE,
   CONSTRAINT fk_friend_requests_receiver FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE,
   CONSTRAINT fk_friend_requests_group FOREIGN KEY (requester_group_id) REFERENCES friend_groups(id) ON DELETE SET NULL,
-  CONSTRAINT uk_friend_requests_pair_status UNIQUE (requester_id, receiver_id, status),
   CONSTRAINT chk_friend_requests_not_self CHECK (requester_id <> receiver_id),
   CONSTRAINT chk_friend_requests_status CHECK (status IN ('PENDING', 'ACCEPTED'))
 );
@@ -109,6 +108,7 @@ CREATE INDEX idx_comments_post_created ON comments(post_id, created_at);
 CREATE INDEX idx_comments_content ON comments(content);
 CREATE INDEX idx_friendships_owner ON friendships(owner_id);
 CREATE INDEX idx_friend_requests_receiver_status ON friend_requests(receiver_id, status, created_at);
+CREATE INDEX idx_friend_requests_requester_receiver_status ON friend_requests(requester_id, receiver_id, status);
 
 CREATE VIEW admin_post_review_view AS
 SELECT
