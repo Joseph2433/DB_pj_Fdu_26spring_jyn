@@ -1,2 +1,21 @@
 # lab5要求
 Lab5 数据库应用开发大作业.pdf
+
+# Java / Maven
+backend/target/
+
+# Node / Vite
+frontend/node_modules/
+frontend/dist/
+
+# Local secrets
+.env
+*.env
+
+# agents
+AGENTS.md
+docs
+
+# idea
+.idea
+
