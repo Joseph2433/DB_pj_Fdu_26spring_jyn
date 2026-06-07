@@ -43,6 +43,9 @@ public interface AdminMapper {
     @Delete("DELETE FROM users WHERE id = #{userId}")
     int deleteUser(long userId);
 
+    @Delete("DELETE FROM users WHERE username = #{username}")
+    int deleteUserByUsername(@Param("username") String username);
+
     @Insert("""
         INSERT INTO post_audit_logs(post_id, admin_id, action, reason)
         VALUES (#{postId}, #{adminId}, #{action}, #{reason})
@@ -55,4 +58,10 @@ public interface AdminMapper {
 
     @Update("UPDATE admins SET display_name = #{displayName} WHERE id = #{adminId}")
     int updateProfile(@Param("adminId") long adminId, @Param("displayName") String displayName);
+
+    @Select("SELECT password_hash FROM admins WHERE id = #{adminId}")
+    String selectPasswordHash(long adminId);
+
+    @Update("UPDATE admins SET password_hash = #{passwordHash} WHERE id = #{adminId}")
+    int updatePasswordHash(@Param("adminId") long adminId, @Param("passwordHash") String passwordHash);
 }

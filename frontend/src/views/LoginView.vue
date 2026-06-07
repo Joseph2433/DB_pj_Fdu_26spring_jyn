@@ -74,9 +74,9 @@
       </header>
 
       <div class="segmented">
-        <button type="button" :class="{ active: mode === 'user' }" @click="mode = 'user'">用户</button>
-        <button type="button" :class="{ active: mode === 'admin' }" @click="mode = 'admin'">管理员</button>
-        <button type="button" :class="{ active: mode === 'register' }" @click="mode = 'register'">注册</button>
+        <button data-test="login-mode-user" type="button" :class="{ active: mode === 'user' }" @click="switchMode('user')">用户</button>
+        <button data-test="login-mode-admin" type="button" :class="{ active: mode === 'admin' }" @click="switchMode('admin')">管理员</button>
+        <button data-test="login-mode-register" type="button" :class="{ active: mode === 'register' }" @click="switchMode('register')">注册</button>
       </div>
 
       <form @submit.prevent="submit">
@@ -95,7 +95,39 @@
         <button class="button primary full" type="submit">
           {{ submitText }}
         </button>
+        <button
+          v-if="mode !== 'register'"
+          class="text-button forgot-password-link"
+          data-test="forgot-password-toggle"
+          type="button"
+          @click="toggleReset"
+        >
+          忘记密码
+        </button>
       </form>
+
+      <section v-if="resetOpen && mode !== 'register'" class="password-reset-panel">
+        <header>
+          <p class="eyebrow">{{ mode === 'admin' ? 'Admin Recovery' : 'User Recovery' }}</p>
+          <h3>重置密码</h3>
+        </header>
+        <label>
+          账号
+          <input data-test="reset-username" v-model="resetForm.username" autocomplete="username" />
+        </label>
+        <label>
+          新密码
+          <input data-test="reset-new-password" v-model="resetForm.newPassword" type="password" autocomplete="new-password" />
+        </label>
+        <label>
+          确认新密码
+          <input data-test="reset-confirm-password" v-model="resetForm.confirmPassword" type="password" autocomplete="new-password" />
+        </label>
+        <button class="button primary full" data-test="reset-password-submit" type="button" @click="resetPassword">
+          重置密码
+        </button>
+        <p v-if="resetMessage" :class="resetMessageType">{{ resetMessage }}</p>
+      </section>
 
       <p v-if="message" class="error-message">{{ message }}</p>
     </section>
@@ -106,16 +138,24 @@
 import { computed, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { MessageCircle, Sparkles, Users } from 'lucide-vue-next'
-import { loginAdmin, loginUser, registerUser } from '../api/client'
+import { loginAdmin, loginUser, registerUser, resetAdminPassword, resetUserPassword } from '../api/client'
 
 const router = useRouter()
 const route = useRoute()
 const mode = ref('user')
 const message = ref('')
+const resetOpen = ref(false)
+const resetMessage = ref('')
+const resetMessageType = ref('muted-message')
 const form = reactive({
   username: '',
   password: '',
   displayName: ''
+})
+const resetForm = reactive({
+  username: '',
+  newPassword: '',
+  confirmPassword: ''
 })
 
 const submitText = computed(() => {
@@ -145,5 +185,42 @@ async function submit() {
   const allowedPrefix = mode.value === 'admin' ? '/admin' : '/user'
   const redirectPath = typeof route.query.redirect === 'string' ? route.query.redirect : ''
   router.push(redirectPath.startsWith(allowedPrefix) ? redirectPath : fallbackPath)
+}
+
+function switchMode(nextMode) {
+  mode.value = nextMode
+  resetOpen.value = false
+  resetMessage.value = ''
+}
+
+function toggleReset() {
+  resetOpen.value = !resetOpen.value
+  resetMessage.value = ''
+  if (resetOpen.value && !resetForm.username) {
+    resetForm.username = form.username
+  }
+}
+
+async function resetPassword() {
+  resetMessage.value = ''
+  if (resetForm.newPassword !== resetForm.confirmPassword) {
+    resetMessage.value = '两次输入的新密码不一致'
+    resetMessageType.value = 'error-message'
+    return
+  }
+  const payload = {
+    username: resetForm.username,
+    newPassword: resetForm.newPassword,
+    confirmPassword: resetForm.confirmPassword
+  }
+  const response = mode.value === 'admin' ? await resetAdminPassword(payload) : await resetUserPassword(payload)
+  resetMessage.value = response.success ? '密码已重置，请重新登录' : response.message || '密码重置失败'
+  resetMessageType.value = response.success ? 'success-message' : 'error-message'
+  if (response.success) {
+    form.username = resetForm.username
+    form.password = ''
+    resetForm.newPassword = ''
+    resetForm.confirmPassword = ''
+  }
 }
 </script>

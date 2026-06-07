@@ -21,6 +21,12 @@ public interface UserMapper {
                       @Param("gender") String gender, @Param("birthday") java.time.LocalDate birthday,
                       @Param("age") Integer age);
 
+    @Select("SELECT password_hash FROM users WHERE id = #{userId} AND status = 'ACTIVE'")
+    String selectPasswordHash(long userId);
+
+    @Update("UPDATE users SET password_hash = #{passwordHash} WHERE id = #{userId} AND status = 'ACTIVE'")
+    int updatePasswordHash(@Param("userId") long userId, @Param("passwordHash") String passwordHash);
+
     @Select("""
         SELECT id, username, display_name
         FROM users

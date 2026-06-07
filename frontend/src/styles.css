@@ -333,6 +333,25 @@ h2 {
   margin-top: 18px;
 }
 
+.forgot-password-link {
+  justify-self: end;
+  margin-top: -4px;
+}
+
+.password-reset-panel {
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+  margin-top: 14px;
+  padding-top: 14px;
+}
+
+.password-reset-panel h3 {
+  margin: 2px 0 0;
+  font-size: 20px;
+  line-height: 1.15;
+}
+
 .login-showcase {
   display: grid;
   width: min(740px, 100%);
@@ -1169,6 +1188,34 @@ h2 {
   padding-top: 14px;
 }
 
+.profile-password-panel {
+  display: grid;
+  gap: 12px;
+  border-top: 1px solid var(--line);
+  margin-top: 16px;
+  padding-top: 16px;
+}
+
+.profile-password-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.profile-password-head h3 {
+  margin: 2px 0 0;
+  font-size: 20px;
+  line-height: 1.15;
+}
+
+.password-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(150px, 1fr)) auto;
+  gap: 10px;
+  align-items: end;
+}
+
 .empty-state {
   border: 1px dashed var(--line);
   border-radius: 8px;
@@ -1315,6 +1362,7 @@ h2 {
   .feed-masonry,
   .form-grid,
   .form-grid.three-columns,
+  .password-grid,
   .search-results li,
   .friend-row {
     grid-template-columns: 1fr;

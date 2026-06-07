@@ -27,6 +27,16 @@ export async function loginAdmin(payload) {
   return data
 }
 
+export async function resetUserPassword(payload) {
+  const { data } = await http.put('/auth/password-reset', payload)
+  return data
+}
+
+export async function resetAdminPassword(payload) {
+  const { data } = await http.put('/admin/auth/password-reset', payload)
+  return data
+}
+
 export async function logout() {
   const { data } = await http.post('/auth/logout')
   return data
@@ -39,6 +49,11 @@ export async function getMe() {
 
 export async function updateMe(payload) {
   const { data } = await http.put('/users/me', payload)
+  return data
+}
+
+export async function updatePassword(payload) {
+  const { data } = await http.put('/users/me/password', payload)
   return data
 }
 
@@ -142,6 +157,11 @@ export async function updateAdminMe(payload) {
   return data
 }
 
+export async function updateAdminPassword(payload) {
+  const { data } = await http.put('/admin/me/password', payload)
+  return data
+}
+
 export async function fetchAdminPosts() {
   const { data } = await http.get('/admin/posts')
   return data
@@ -152,8 +172,8 @@ export async function adminDeletePost(postId) {
   return data
 }
 
-export async function adminDeleteUser(userId) {
-  const { data } = await http.delete(`/admin/users/${userId}`)
+export async function adminDeleteUser(username) {
+  const { data } = await http.delete('/admin/users/by-username', { params: { username } })
   return data
 }
 

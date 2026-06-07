@@ -51,4 +51,25 @@ describe('ReviewList', () => {
 
     expect(api.adminDeletePost).toHaveBeenCalledWith(8)
   })
+
+  it('deletes a user by account name instead of numeric id', async () => {
+    api.fetchAdminPosts.mockResolvedValue({ success: true, data: [] })
+    api.adminDeleteUser.mockResolvedValue({ success: true })
+
+    const wrapper = mount(ReviewList)
+    await flushPromises()
+
+    expect(wrapper.text()).not.toContain('用户 ID')
+
+    const accountInput = wrapper.find('[data-test="delete-user-account"]')
+    expect(accountInput.exists()).toBe(true)
+    expect(accountInput.attributes('type')).toBe('text')
+    expect(accountInput.attributes('placeholder')).toBe('用户账号')
+
+    await accountInput.setValue('bob')
+    await wrapper.find('[data-test="delete-user-submit"]').trigger('click')
+    await flushPromises()
+
+    expect(api.adminDeleteUser).toHaveBeenCalledWith('bob')
+  })
 })

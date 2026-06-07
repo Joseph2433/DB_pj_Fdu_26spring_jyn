@@ -1,6 +1,8 @@
 package com.fudan.lab5.admin;
 
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
@@ -30,5 +32,31 @@ class AdminMapperTest {
         String sql = String.join("\n", method.getAnnotation(Select.class).value());
 
         assertThat(sql).contains("u.username AS author_username");
+    }
+
+    @Test
+    void deleteUserByUsernameSqlDeletesByBoundUsername() throws NoSuchMethodException {
+        Method method = AdminMapper.class.getMethod("deleteUserByUsername", String.class);
+        String sql = method.getAnnotation(Delete.class).value()[0];
+
+        assertThat(sql).contains("username = #{username}");
+    }
+
+    @Test
+    void passwordHashSqlReadsAdminPasswordHash() throws NoSuchMethodException {
+        Method method = AdminMapper.class.getMethod("selectPasswordHash", long.class);
+        String sql = method.getAnnotation(Select.class).value()[0];
+
+        assertThat(sql).contains("password_hash");
+        assertThat(sql).contains("id = #{adminId}");
+    }
+
+    @Test
+    void passwordUpdateSqlUsesBoundAdminHash() throws NoSuchMethodException {
+        Method method = AdminMapper.class.getMethod("updatePasswordHash", long.class, String.class);
+        String sql = method.getAnnotation(Update.class).value()[0];
+
+        assertThat(sql).contains("password_hash = #{passwordHash}");
+        assertThat(sql).contains("id = #{adminId}");
     }
 }

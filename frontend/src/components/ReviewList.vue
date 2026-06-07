@@ -104,8 +104,20 @@
         <ShieldAlert class="panel-icon" aria-hidden="true" />
       </header>
       <div class="inline-form">
-        <input v-model.number="targetUser" type="number" min="1" placeholder="用户 ID" aria-label="用户 ID" />
-        <button class="button danger" type="button" :disabled="!targetUser" @click="removeUser">
+        <input
+          data-test="delete-user-account"
+          v-model="targetUsername"
+          type="text"
+          placeholder="用户账号"
+          aria-label="用户账号"
+        />
+        <button
+          class="button danger"
+          data-test="delete-user-submit"
+          type="button"
+          :disabled="!targetUsername.trim()"
+          @click="removeUser"
+        >
           注销
         </button>
       </div>
@@ -122,7 +134,7 @@ import PostCard from './PostCard.vue'
 import { authorLabel, commentCount, formatDateTime } from '../utils/formatters'
 
 const posts = ref([])
-const targetUser = ref(null)
+const targetUsername = ref('')
 const message = ref('')
 const messageType = ref('muted-message')
 const viewMode = ref('list')
@@ -140,12 +152,13 @@ async function removePost(postId) {
 }
 
 async function removeUser() {
-  if (!targetUser.value) return
-  const response = await adminDeleteUser(targetUser.value)
+  const username = targetUsername.value.trim()
+  if (!username) return
+  const response = await adminDeleteUser(username)
   message.value = response.success ? '用户已注销' : response.message || '注销失败'
   messageType.value = response.success ? 'success-message' : 'error-message'
   if (response.success) {
-    targetUser.value = null
+    targetUsername.value = ''
     await loadPosts()
   }
 }
