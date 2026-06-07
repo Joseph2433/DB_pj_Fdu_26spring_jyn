@@ -1057,6 +1057,60 @@ h2 {
   margin-left: auto;
 }
 
+.visibility-action {
+  color: var(--moss-dark);
+}
+
+.visibility-dialog {
+  width: min(620px, 100%);
+}
+
+.visibility-tabs {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.visibility-target-list {
+  display: grid;
+  gap: 10px;
+}
+
+.visibility-option {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(246, 247, 241, 0.72);
+  color: var(--ink);
+  padding: 10px;
+}
+
+.visibility-option input {
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  padding: 0;
+  accent-color: var(--moss);
+}
+
+.visibility-option span {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.visibility-option strong,
+.visibility-option small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.visibility-option small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .post-edit-panel {
   display: grid;
   gap: 10px;

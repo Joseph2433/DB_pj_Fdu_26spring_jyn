@@ -6,7 +6,11 @@ import * as api from '../api/client'
 vi.mock('../api/client', () => ({
   addComment: vi.fn(),
   deletePost: vi.fn(),
+  fetchFriends: vi.fn(),
+  fetchGroups: vi.fn(),
   fetchMyPosts: vi.fn(),
+  fetchPostVisibility: vi.fn(),
+  updatePostVisibility: vi.fn(),
   updatePost: vi.fn()
 }))
 
@@ -34,6 +38,16 @@ describe('UserPostsView', () => {
     mockMyPosts()
     api.addComment.mockResolvedValue({ success: true })
     api.deletePost.mockResolvedValue({ success: true })
+    api.fetchGroups.mockResolvedValue({
+      success: true,
+      data: [{ id: 7, userId: 1, name: 'Project Team' }]
+    })
+    api.fetchFriends.mockResolvedValue({
+      success: true,
+      data: [{ friendshipId: 1, friendId: 2, username: 'bob', displayName: 'Bob', groupId: 7, groupName: 'Project Team' }]
+    })
+    api.fetchPostVisibility.mockResolvedValue({ success: true, data: [] })
+    api.updatePostVisibility.mockResolvedValue({ success: true })
     api.updatePost.mockResolvedValue({ success: true })
   })
 
@@ -70,5 +84,39 @@ describe('UserPostsView', () => {
     await flushPromises()
 
     expect(api.deletePost).toHaveBeenCalledWith(12)
+  })
+
+  it('sets group allow visibility and friend deny visibility for my posts', async () => {
+    const wrapper = mount(UserPostsView)
+    await flushPromises()
+
+    await wrapper.find('[data-test="allow-post-12"]').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('设置可见范围')
+    expect(api.fetchPostVisibility).toHaveBeenCalledWith(12)
+
+    await wrapper.find('[data-test="visibility-target-GROUP-7"]').setValue(true)
+    await wrapper.find('[data-test="save-visibility"]').trigger('click')
+    await flushPromises()
+
+    expect(api.updatePostVisibility).toHaveBeenCalledWith(12, {
+      ruleType: 'ALLOW',
+      targetType: 'GROUP',
+      targetIds: [7]
+    })
+
+    await wrapper.find('[data-test="deny-post-12"]').trigger('click')
+    await flushPromises()
+    await wrapper.find('[data-test="visibility-tab-USER"]').trigger('click')
+    await wrapper.find('[data-test="visibility-target-USER-2"]').setValue(true)
+    await wrapper.find('[data-test="save-visibility"]').trigger('click')
+    await flushPromises()
+
+    expect(api.updatePostVisibility).toHaveBeenCalledWith(12, {
+      ruleType: 'DENY',
+      targetType: 'USER',
+      targetIds: [2]
+    })
   })
 })
