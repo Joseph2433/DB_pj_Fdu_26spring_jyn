@@ -19,6 +19,12 @@
           <button class="button danger" type="button" @click="remove(post.id)">删除</button>
         </div>
       </div>
+      <ul v-if="post.comments?.length" class="comment-list">
+        <li v-for="comment in post.comments" :key="comment.id">
+          <strong>{{ userLabel(comment.authorId) }}</strong>
+          <span>{{ comment.content }}</span>
+        </li>
+      </ul>
     </article>
     <p v-if="posts.length === 0" class="empty-state">还没有发布朋友圈</p>
   </section>
@@ -28,7 +34,7 @@
 import { onMounted, reactive, ref } from 'vue'
 import { RefreshCw } from 'lucide-vue-next'
 import { deletePost, fetchMyPosts, updatePost } from '../api/client'
-import { formatDateTime } from '../utils/formatters'
+import { formatDateTime, userLabel } from '../utils/formatters'
 
 const posts = ref([])
 const edits = reactive({})
