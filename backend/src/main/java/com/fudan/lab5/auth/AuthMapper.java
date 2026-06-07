@@ -4,6 +4,7 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 @Mapper
 public interface AuthMapper {
@@ -18,4 +19,10 @@ public interface AuthMapper {
         VALUES (#{username}, #{passwordHash}, #{displayName})
         """)
     int insertUser(@Param("username") String username, @Param("passwordHash") String passwordHash, @Param("displayName") String displayName);
+
+    @Update("UPDATE users SET password_hash = #{passwordHash} WHERE username = #{username} AND status = 'ACTIVE'")
+    int updateUserPasswordHashByUsername(@Param("username") String username, @Param("passwordHash") String passwordHash);
+
+    @Update("UPDATE admins SET password_hash = #{passwordHash} WHERE username = #{username}")
+    int updateAdminPasswordHashByUsername(@Param("username") String username, @Param("passwordHash") String passwordHash);
 }

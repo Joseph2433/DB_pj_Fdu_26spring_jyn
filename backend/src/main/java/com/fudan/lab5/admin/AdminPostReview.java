@@ -1,7 +1,11 @@
 package com.fudan.lab5.admin;
 
-import java.time.LocalDateTime;
+import com.fudan.lab5.post.CommentSummary;
 
-public record AdminPostReview(long postId, long authorId, String content, String status,
-                              LocalDateTime createdAt, LocalDateTime lastUpdatedAt, long commentCount) {
+import java.time.LocalDateTime;
+import java.util.List;
+
+public record AdminPostReview(long postId, long authorId, String authorUsername, String content, String status,
+                              LocalDateTime createdAt, LocalDateTime lastUpdatedAt, long commentCount,
+                              List<CommentSummary> comments) {
 }

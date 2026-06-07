@@ -12,38 +12,59 @@ import java.util.List;
 @Mapper
 public interface PostMapper {
     @Select("""
-        SELECT DISTINCT
+        SELECT
           p.id,
           p.author_id,
+          u.username AS author_username,
           p.content,
           p.last_updated_at
         FROM posts p
-        JOIN friendships f ON f.friend_id = p.author_id
+        JOIN users u ON u.id = p.author_id
+        LEFT JOIN friendships f ON f.owner_id = #{userId} AND f.friend_id = p.author_id
         LEFT JOIN comments c ON c.post_id = p.id
-        WHERE f.owner_id = #{userId}
-          AND p.status = 'VISIBLE'
+        WHERE p.status = 'VISIBLE'
+          AND (p.author_id = #{userId} OR f.id IS NOT NULL)
           AND (
             #{keyword} IS NULL
             OR p.content LIKE CONCAT('%', #{keyword}, '%')
             OR c.content LIKE CONCAT('%', #{keyword}, '%')
           )
-        ORDER BY p.last_updated_at DESC
+        GROUP BY p.id, p.author_id, u.username, p.content, p.last_updated_at, p.created_at
+        ORDER BY p.created_at DESC
         """)
     List<PostRow> selectFriendFeedRows(@Param("userId") long userId, @Param("keyword") String keyword);
 
     @Select("""
-        SELECT id, author_id, content, last_updated_at
-        FROM posts
-        WHERE author_id = #{userId} AND status = 'VISIBLE'
-        ORDER BY last_updated_at DESC
+        SELECT p.id, p.author_id, u.username AS author_username, p.content, p.last_updated_at
+        FROM posts p
+        JOIN users u ON u.id = p.author_id
+        WHERE p.author_id = #{userId} AND p.status = 'VISIBLE'
+        ORDER BY p.created_at DESC
         """)
     List<PostRow> selectMyPostRows(long userId);
 
     @Select("""
-        SELECT id, author_id, content, created_at
-        FROM comments
-        WHERE post_id = #{postId}
-        ORDER BY created_at
+        SELECT p.id, p.author_id, u.username AS author_username, p.content, p.last_updated_at
+        FROM posts p
+        JOIN users u ON u.id = p.author_id
+        WHERE p.author_id = #{friendId}
+          AND p.status = 'VISIBLE'
+          AND EXISTS (
+            SELECT 1
+            FROM friendships f
+            WHERE f.owner_id = #{userId}
+              AND f.friend_id = #{friendId}
+          )
+        ORDER BY p.created_at DESC
+        """)
+    List<PostRow> selectFriendPostRows(@Param("userId") long userId, @Param("friendId") long friendId);
+
+    @Select("""
+        SELECT c.id, c.author_id, u.username AS author_username, c.content, c.created_at
+        FROM comments c
+        JOIN users u ON u.id = c.author_id
+        WHERE c.post_id = #{postId}
+        ORDER BY c.created_at
         """)
     List<CommentSummary> selectComments(long postId);
 

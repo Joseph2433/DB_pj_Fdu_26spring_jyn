@@ -36,6 +36,11 @@ public class PostController {
         return ApiResponse.ok(postService.myPosts(currentSession.requireUserId(session)));
     }
 
+    @GetMapping("/friends/{friendId}")
+    public ApiResponse<List<PostSummary>> friendPosts(@PathVariable long friendId, HttpSession session) {
+        return ApiResponse.ok(postService.friendPosts(currentSession.requireUserId(session), friendId));
+    }
+
     @PostMapping
     public ApiResponse<Void> create(@RequestBody PostCreateRequest request, HttpSession session) {
         postService.createPost(currentSession.requireUserId(session), request);

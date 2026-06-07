@@ -19,4 +19,17 @@ describe('AiDraftPanel', () => {
 
     expect(wrapper.emitted('select-draft')[0]).toEqual(['今天的数据库实验很顺利'])
   })
+
+  it('shows an error when topic is empty', async () => {
+    const generate = vi.fn()
+    const wrapper = mount(AiDraftPanel, {
+      props: { generate }
+    })
+
+    await wrapper.find('button[data-test="generate"]').trigger('click')
+    await flushPromises()
+
+    expect(generate).not.toHaveBeenCalled()
+    expect(wrapper.text()).toContain('主题不能为空')
+  })
 })

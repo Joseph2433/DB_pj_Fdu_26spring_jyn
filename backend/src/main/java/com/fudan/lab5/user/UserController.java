@@ -2,6 +2,7 @@ package com.fudan.lab5.user;
 
 import com.fudan.lab5.common.ApiResponse;
 import com.fudan.lab5.common.CurrentSession;
+import com.fudan.lab5.common.PasswordUpdateRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -28,5 +29,11 @@ public class UserController {
     @PutMapping("/me")
     public ApiResponse<UserProfile> updateMe(@RequestBody ProfileUpdateRequest request, HttpSession session) {
         return ApiResponse.ok(userService.updateProfile(currentSession.requireUserId(session), request));
+    }
+
+    @PutMapping("/me/password")
+    public ApiResponse<Void> updatePassword(@RequestBody PasswordUpdateRequest request, HttpSession session) {
+        userService.updatePassword(currentSession.requireUserId(session), request);
+        return ApiResponse.ok(null);
     }
 }

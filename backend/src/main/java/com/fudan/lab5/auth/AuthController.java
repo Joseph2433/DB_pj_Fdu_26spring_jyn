@@ -1,8 +1,10 @@
 package com.fudan.lab5.auth;
 
 import com.fudan.lab5.common.ApiResponse;
+import com.fudan.lab5.common.PasswordResetRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,6 +35,12 @@ public class AuthController {
     @PostMapping("/logout")
     public ApiResponse<Void> logout(HttpSession session) {
         session.invalidate();
+        return ApiResponse.ok(null);
+    }
+
+    @PutMapping("/password-reset")
+    public ApiResponse<Void> resetPassword(@RequestBody PasswordResetRequest request) {
+        authService.resetUserPassword(request);
         return ApiResponse.ok(null);
     }
 }

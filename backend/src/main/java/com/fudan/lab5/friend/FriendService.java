@@ -28,6 +28,10 @@ public class FriendService {
         return friendMapper.selectGroups(userId);
     }
 
+    public List<FriendRequestView> friendRequests(long userId) {
+        return friendMapper.selectPendingRequests(userId);
+    }
+
     @Transactional
     public void createGroup(long userId, GroupRequest request) {
         try {
@@ -60,10 +64,33 @@ public class FriendService {
             throw new IllegalArgumentException("好友用户不存在");
         }
         validateGroup(userId, request.groupId());
+        if (friendMapper.countFriendship(userId, request.friendId()) > 0
+            || friendMapper.countFriendship(request.friendId(), userId) > 0) {
+            throw new IllegalArgumentException("已经是好友");
+        }
+        if (friendMapper.countPendingRequest(request.friendId(), userId) > 0) {
+            throw new IllegalArgumentException("对方已发送好友申请，请先处理申请");
+        }
+        if (friendMapper.countPendingRequest(userId, request.friendId()) > 0) {
+            throw new IllegalArgumentException("好友申请已发送");
+        }
         try {
-            friendMapper.insertFriend(userId, request.friendId(), request.groupId());
+            friendMapper.insertFriendRequest(userId, request.friendId(), request.groupId());
         } catch (DuplicateKeyException ex) {
-            throw new IllegalArgumentException("已经添加过该好友");
+            throw new IllegalArgumentException("好友申请已发送");
+        }
+    }
+
+    @Transactional
+    public void acceptFriendRequest(long userId, long requestId) {
+        FriendRequestRow request = friendMapper.selectPendingRequestForReceiver(requestId, userId);
+        if (request == null) {
+            throw new IllegalArgumentException("好友申请不存在");
+        }
+        insertFriendIfMissing(request.requesterId(), userId, request.requesterGroupId());
+        insertFriendIfMissing(userId, request.requesterId(), null);
+        if (friendMapper.markRequestAccepted(requestId) == 0) {
+            throw new IllegalArgumentException("好友申请不存在");
         }
     }
 
@@ -72,6 +99,7 @@ public class FriendService {
         if (friendMapper.deleteFriend(userId, friendId) == 0) {
             throw new IllegalArgumentException("好友关系不存在");
         }
+        friendMapper.deleteFriend(friendId, userId);
     }
 
     @Transactional
@@ -85,6 +113,14 @@ public class FriendService {
     private void validateGroup(long userId, Long groupId) {
         if (groupId != null && friendMapper.countOwnedGroup(userId, groupId) == 0) {
             throw new IllegalArgumentException("好友分组不存在");
+        }
+    }
+
+    private void insertFriendIfMissing(long ownerId, long friendId, Long groupId) {
+        try {
+            friendMapper.insertFriend(ownerId, friendId, groupId);
+        } catch (DuplicateKeyException ignored) {
+            // Existing one-way rows can remain when accepting a request made before the flow changed.
         }
     }
 

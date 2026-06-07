@@ -1,5 +1,6 @@
 package com.fudan.lab5.admin;
 
+import com.fudan.lab5.post.CommentSummary;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
@@ -12,17 +13,38 @@ import java.util.List;
 @Mapper
 public interface AdminMapper {
     @Select("""
-        SELECT post_id, author_id, content, status, created_at, last_updated_at, comment_count
-        FROM admin_post_review_view
-        ORDER BY last_updated_at DESC
+        SELECT
+          v.post_id,
+          v.author_id,
+          u.username AS author_username,
+          v.content,
+          v.status,
+          v.created_at,
+          v.last_updated_at,
+          v.comment_count
+        FROM admin_post_review_view v
+        JOIN users u ON u.id = v.author_id
+        ORDER BY v.created_at DESC
         """)
-    List<AdminPostReview> selectReviewPosts();
+    List<AdminPostReviewRow> selectReviewPostRows();
+
+    @Select("""
+        SELECT c.id, c.author_id, u.username AS author_username, c.content, c.created_at
+        FROM comments c
+        JOIN users u ON u.id = c.author_id
+        WHERE c.post_id = #{postId}
+        ORDER BY c.created_at
+        """)
+    List<CommentSummary> selectComments(long postId);
 
     @Delete("DELETE FROM posts WHERE id = #{postId}")
     int deletePost(long postId);
 
     @Delete("DELETE FROM users WHERE id = #{userId}")
     int deleteUser(long userId);
+
+    @Delete("DELETE FROM users WHERE username = #{username}")
+    int deleteUserByUsername(@Param("username") String username);
 
     @Insert("""
         INSERT INTO post_audit_logs(post_id, admin_id, action, reason)
@@ -36,4 +58,10 @@ public interface AdminMapper {
 
     @Update("UPDATE admins SET display_name = #{displayName} WHERE id = #{adminId}")
     int updateProfile(@Param("adminId") long adminId, @Param("displayName") String displayName);
+
+    @Select("SELECT password_hash FROM admins WHERE id = #{adminId}")
+    String selectPasswordHash(long adminId);
+
+    @Update("UPDATE admins SET password_hash = #{passwordHash} WHERE id = #{adminId}")
+    int updatePasswordHash(@Param("adminId") long adminId, @Param("passwordHash") String passwordHash);
 }

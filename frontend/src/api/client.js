@@ -27,6 +27,16 @@ export async function loginAdmin(payload) {
   return data
 }
 
+export async function resetUserPassword(payload) {
+  const { data } = await http.put('/auth/password-reset', payload)
+  return data
+}
+
+export async function resetAdminPassword(payload) {
+  const { data } = await http.put('/admin/auth/password-reset', payload)
+  return data
+}
+
 export async function logout() {
   const { data } = await http.post('/auth/logout')
   return data
@@ -42,6 +52,11 @@ export async function updateMe(payload) {
   return data
 }
 
+export async function updatePassword(payload) {
+  const { data } = await http.put('/users/me/password', payload)
+  return data
+}
+
 export async function searchUsers(keyword) {
   const { data } = await http.get('/friends/search', { params: { keyword } })
   return data
@@ -49,6 +64,11 @@ export async function searchUsers(keyword) {
 
 export async function fetchFriends() {
   const { data } = await http.get('/friends')
+  return data
+}
+
+export async function fetchFriendRequests() {
+  const { data } = await http.get('/friend-requests')
   return data
 }
 
@@ -62,8 +82,18 @@ export async function createGroup(name) {
   return data
 }
 
+export async function deleteGroup(groupId) {
+  const { data } = await http.delete(`/friend-groups/${groupId}`)
+  return data
+}
+
 export async function addFriend(friendId, groupId = null) {
   const { data } = await http.post('/friends', { friendId, groupId })
+  return data
+}
+
+export async function acceptFriendRequest(requestId) {
+  const { data } = await http.post(`/friend-requests/${requestId}/accept`)
   return data
 }
 
@@ -84,6 +114,11 @@ export async function fetchFeed(keyword = '') {
 
 export async function fetchMyPosts() {
   const { data } = await http.get('/posts/mine')
+  return data
+}
+
+export async function fetchFriendPosts(friendId) {
+  const { data } = await http.get(`/posts/friends/${friendId}`)
   return data
 }
 
@@ -122,6 +157,11 @@ export async function updateAdminMe(payload) {
   return data
 }
 
+export async function updateAdminPassword(payload) {
+  const { data } = await http.put('/admin/me/password', payload)
+  return data
+}
+
 export async function fetchAdminPosts() {
   const { data } = await http.get('/admin/posts')
   return data
@@ -132,8 +172,8 @@ export async function adminDeletePost(postId) {
   return data
 }
 
-export async function adminDeleteUser(userId) {
-  const { data } = await http.delete(`/admin/users/${userId}`)
+export async function adminDeleteUser(username) {
+  const { data } = await http.delete('/admin/users/by-username', { params: { username } })
   return data
 }
 

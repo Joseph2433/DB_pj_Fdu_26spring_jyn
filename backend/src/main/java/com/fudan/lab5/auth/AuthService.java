@@ -1,5 +1,6 @@
 package com.fudan.lab5.auth;
 
+import com.fudan.lab5.common.PasswordResetRequest;
 import com.fudan.lab5.common.PasswordService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +39,31 @@ public class AuthService {
             throw new IllegalArgumentException("管理员用户名或密码错误");
         }
         return new LoginResponse(account.id(), account.username(), account.displayName(), "ADMIN");
+    }
+
+    @Transactional
+    public void resetUserPassword(PasswordResetRequest request) {
+        String username = requireText(request.username(), "用户名不能为空");
+        String passwordHash = resetPasswordHash(request);
+        if (authMapper.updateUserPasswordHashByUsername(username, passwordHash) == 0) {
+            throw new IllegalArgumentException("用户不存在或已注销");
+        }
+    }
+
+    @Transactional
+    public void resetAdminPassword(PasswordResetRequest request) {
+        String username = requireText(request.username(), "管理员用户名不能为空");
+        String passwordHash = resetPasswordHash(request);
+        if (authMapper.updateAdminPasswordHashByUsername(username, passwordHash) == 0) {
+            throw new IllegalArgumentException("管理员不存在");
+        }
+    }
+
+    private String resetPasswordHash(PasswordResetRequest request) {
+        if (request.newPassword() == null || !request.newPassword().equals(request.confirmPassword())) {
+            throw new IllegalArgumentException("两次输入的新密码不一致");
+        }
+        return passwordService.hash(request.newPassword());
     }
 
     private String requireText(String value, String message) {
