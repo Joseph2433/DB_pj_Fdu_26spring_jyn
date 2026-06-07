@@ -16,9 +16,10 @@ describe('UserFeedView', () => {
         {
           id: 7,
           authorId: 2,
+          authorUsername: 'bob',
           content: '数据库实验记录',
           lastUpdatedAt: '2026-06-07T10:00:00',
-          comments: [{ id: 3, authorId: 1, content: '关键词命中', createdAt: '2026-06-07T10:10:00' }]
+          comments: [{ id: 3, authorId: 1, authorUsername: 'alice', content: '关键词命中', createdAt: '2026-06-07T10:10:00' }]
         }
       ]
     }
@@ -41,6 +42,9 @@ describe('UserFeedView', () => {
     await flushPromises()
     expect(api.addComment).toHaveBeenCalledWith(7, '收到')
 
+    expect(wrapper.text()).toContain('bob')
+    expect(wrapper.text()).toContain('alice')
+    expect(wrapper.text()).not.toContain('用户 #')
     expect(wrapper.find('[data-test="feed-clear"]').exists()).toBe(false)
   })
 })

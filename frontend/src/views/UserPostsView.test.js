@@ -17,10 +17,11 @@ function mockMyPosts() {
       {
         id: 12,
         authorId: 1,
+        authorUsername: 'alice',
         content: 'My post',
         lastUpdatedAt: '2026-06-07T12:00:00',
         comments: [
-          { id: 3, authorId: 2, content: 'First comment', createdAt: '2026-06-07T12:10:00' }
+          { id: 3, authorId: 2, authorUsername: 'bob', content: 'First comment', createdAt: '2026-06-07T12:10:00' }
         ]
       }
     ]
@@ -42,6 +43,9 @@ describe('UserPostsView', () => {
 
     expect(wrapper.find('.post-card').exists()).toBe(true)
     expect(wrapper.text()).toContain('First comment')
+    expect(wrapper.text()).toContain('alice')
+    expect(wrapper.text()).toContain('bob')
+    expect(wrapper.text()).not.toContain('用户 #')
 
     await wrapper.find('[data-test="comment-input-12"]').setValue('My own follow-up')
     await wrapper.find('[data-test="comment-form-12"]').trigger('submit')

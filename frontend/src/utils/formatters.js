@@ -2,8 +2,12 @@ export function formatDateTime(value) {
   return value ? String(value).replace('T', ' ').slice(0, 19) : '暂无时间'
 }
 
-export function userLabel(id) {
-  return `用户 #${id}`
+export function userLabel() {
+  return '未知用户'
+}
+
+export function authorLabel(entity) {
+  return entity?.authorUsername || entity?.username || userLabel(entity?.authorId ?? entity?.id)
 }
 
 export function commentCount(post) {

@@ -12,9 +12,18 @@ import java.util.List;
 @Mapper
 public interface AdminMapper {
     @Select("""
-        SELECT post_id, author_id, content, status, created_at, last_updated_at, comment_count
-        FROM admin_post_review_view
-        ORDER BY last_updated_at DESC
+        SELECT
+          v.post_id,
+          v.author_id,
+          u.username AS author_username,
+          v.content,
+          v.status,
+          v.created_at,
+          v.last_updated_at,
+          v.comment_count
+        FROM admin_post_review_view v
+        JOIN users u ON u.id = v.author_id
+        ORDER BY v.last_updated_at DESC
         """)
     List<AdminPostReview> selectReviewPosts();
 

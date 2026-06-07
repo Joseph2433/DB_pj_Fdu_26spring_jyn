@@ -44,6 +44,7 @@ class PostServiceTest {
         Method method = PostMapper.class.getMethod("selectFriendFeedRows", long.class, String.class);
         String sql = String.join("\n", method.getAnnotation(Select.class).value());
 
+        assertThat(sql).contains("u.username AS author_username");
         assertThat(sql).contains("p.author_id = #{userId}");
         assertThat(sql).contains("ORDER BY p.created_at DESC");
     }
@@ -59,6 +60,7 @@ class PostServiceTest {
         assertThat(mapper.friendAuthorId).isEqualTo(2L);
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().authorId()).isEqualTo(2L);
+        assertThat(result.getFirst().authorUsername()).isEqualTo("bob");
         assertThat(result.getFirst().comments()).isEmpty();
     }
 
@@ -68,9 +70,18 @@ class PostServiceTest {
         String sql = String.join("\n", method.getAnnotation(Select.class).value());
 
         assertThat(sql).contains("p.author_id = #{friendId}");
+        assertThat(sql).contains("u.username AS author_username");
         assertThat(sql).contains("f.owner_id = #{userId}");
         assertThat(sql).contains("f.friend_id = #{friendId}");
         assertThat(sql).contains("ORDER BY p.created_at DESC");
+    }
+
+    @Test
+    void commentsSqlIncludesAuthorUsername() throws NoSuchMethodException {
+        Method method = PostMapper.class.getMethod("selectComments", long.class);
+        String sql = String.join("\n", method.getAnnotation(Select.class).value());
+
+        assertThat(sql).contains("u.username AS author_username");
     }
 
     static class RecordingPostMapper implements PostMapper {
@@ -81,7 +92,7 @@ class PostServiceTest {
         @Override
         public List<PostRow> selectFriendFeedRows(long userId, String keyword) {
             this.keyword = keyword;
-            return List.of(new PostRow(9L, 2L, "AI assistant draft", LocalDateTime.now()));
+            return List.of(new PostRow(9L, 2L, "bob", "AI assistant draft", LocalDateTime.now()));
         }
 
         @Override
@@ -93,7 +104,7 @@ class PostServiceTest {
         public List<PostRow> selectFriendPostRows(long userId, long friendId) {
             this.friendViewerId = userId;
             this.friendAuthorId = friendId;
-            return List.of(new PostRow(11L, friendId, "Friend post", LocalDateTime.now()));
+            return List.of(new PostRow(11L, friendId, "bob", "Friend post", LocalDateTime.now()));
         }
 
         @Override

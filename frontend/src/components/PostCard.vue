@@ -4,7 +4,7 @@
       <div class="author-block">
         <span class="author-avatar">{{ post.authorId }}</span>
         <span>
-          <strong>{{ userLabel(post.authorId) }}</strong>
+          <strong>{{ authorLabel(post) }}</strong>
           <small>{{ formatDateTime(post.lastUpdatedAt) }}</small>
         </span>
       </div>
@@ -22,7 +22,7 @@
     <ul v-if="post.comments?.length" class="comment-list">
       <li v-for="comment in post.comments" :key="comment.id">
         <div class="comment-head">
-          <strong>{{ userLabel(comment.authorId) }}</strong>
+          <strong>{{ authorLabel(comment) }}</strong>
           <button
             v-if="canComment"
             class="text-button"
@@ -51,7 +51,7 @@
 import { ref } from 'vue'
 import { MessageCircle } from 'lucide-vue-next'
 import CommentComposer from './CommentComposer.vue'
-import { commentCount, formatDateTime, userLabel } from '../utils/formatters'
+import { authorLabel, commentCount, formatDateTime } from '../utils/formatters'
 
 defineProps({
   canComment: { type: Boolean, default: true },
@@ -68,7 +68,7 @@ function forwardComment(postId, content) {
 }
 
 function replyTo(comment) {
-  replyPrefill.value = `回复 ${userLabel(comment.authorId)}：`
+  replyPrefill.value = `回复 ${authorLabel(comment)}：`
   replyPrefillKey.value += 1
 }
 </script>

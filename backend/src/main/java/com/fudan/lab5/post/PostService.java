@@ -58,7 +58,7 @@ public class PostService {
 
     private List<PostSummary> withComments(List<PostRow> rows) {
         return rows.stream()
-            .map(row -> new PostSummary(row.id(), row.authorId(), row.content(), row.lastUpdatedAt(), postMapper.selectComments(row.id())))
+            .map(row -> new PostSummary(row.id(), row.authorId(), row.authorUsername(), row.content(), row.lastUpdatedAt(), postMapper.selectComments(row.id())))
             .toList();
     }
 

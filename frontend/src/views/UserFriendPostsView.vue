@@ -32,7 +32,7 @@ const posts = ref([])
 const loading = ref(false)
 
 const friendId = computed(() => Number(route.params.friendId))
-const friendName = computed(() => String(route.query.name || `用户 #${friendId.value}`))
+const friendName = computed(() => String(route.query.name || route.query.username || posts.value[0]?.authorUsername || '好友'))
 const friendUsername = computed(() => route.query.username ? String(route.query.username) : '')
 
 async function loadPosts() {

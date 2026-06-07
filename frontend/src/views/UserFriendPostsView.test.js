@@ -23,9 +23,10 @@ describe('UserFriendPostsView', () => {
         {
           id: 21,
           authorId: 2,
+          authorUsername: 'bob',
           content: 'Bob timeline',
           lastUpdatedAt: '2026-06-07T12:00:00',
-          comments: [{ id: 4, authorId: 1, content: 'Nice', createdAt: '2026-06-07T12:10:00' }]
+          comments: [{ id: 4, authorId: 1, authorUsername: 'alice', content: 'Nice', createdAt: '2026-06-07T12:10:00' }]
         }
       ]
     })
@@ -45,7 +46,10 @@ describe('UserFriendPostsView', () => {
 
     expect(api.fetchFriendPosts).toHaveBeenCalledWith(2)
     expect(wrapper.text()).toContain('Bob')
+    expect(wrapper.text()).toContain('bob')
+    expect(wrapper.text()).toContain('alice')
     expect(wrapper.text()).toContain('Bob timeline')
+    expect(wrapper.text()).not.toContain('用户 #')
 
     await wrapper.find('[data-test="comment-input-21"]').setValue('Great')
     await wrapper.find('[data-test="comment-form-21"]').trigger('submit')

@@ -15,7 +15,7 @@
         <article v-for="post in posts" :key="post.postId" class="review-row">
           <div>
             <strong>动态 #{{ post.postId }}</strong>
-            <small>{{ userLabel(post.authorId) }} · {{ formatDateTime(post.lastUpdatedAt) }}</small>
+            <small>{{ authorLabel(post) }} · {{ formatDateTime(post.lastUpdatedAt) }}</small>
           </div>
           <p>{{ post.content }}</p>
           <span class="meta-pill">{{ post.status }} · 评论 {{ post.commentCount }}</span>
@@ -53,7 +53,7 @@
 import { onMounted, ref } from 'vue'
 import { RefreshCw, ShieldAlert, Trash2 } from 'lucide-vue-next'
 import { adminDeletePost, adminDeleteUser, fetchAdminPosts } from '../api/client'
-import { formatDateTime, userLabel } from '../utils/formatters'
+import { authorLabel, formatDateTime } from '../utils/formatters'
 
 const posts = ref([])
 const targetUser = ref(null)
