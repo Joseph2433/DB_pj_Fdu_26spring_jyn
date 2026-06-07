@@ -9,7 +9,7 @@ vi.mock('../api/client', () => ({
 }))
 
 describe('UserFeedView', () => {
-  it('searches feed, clears keyword, and submits a comment', async () => {
+  it('searches feed and submits a comment without showing a clear button', async () => {
     const postResult = {
       success: true,
       data: [
@@ -26,7 +26,6 @@ describe('UserFeedView', () => {
       .mockResolvedValueOnce(postResult)
       .mockResolvedValueOnce(postResult)
       .mockResolvedValueOnce(postResult)
-      .mockResolvedValueOnce({ success: true, data: [] })
     api.addComment.mockResolvedValue({ success: true })
 
     const wrapper = mount(UserFeedView)
@@ -42,8 +41,6 @@ describe('UserFeedView', () => {
     await flushPromises()
     expect(api.addComment).toHaveBeenCalledWith(7, '收到')
 
-    await wrapper.find('[data-test="feed-clear"]').trigger('click')
-    await flushPromises()
-    expect(api.fetchFeed).toHaveBeenLastCalledWith('')
+    expect(wrapper.find('[data-test="feed-clear"]').exists()).toBe(false)
   })
 })

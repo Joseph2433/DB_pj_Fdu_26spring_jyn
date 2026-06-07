@@ -12,7 +12,6 @@
         <input data-test="feed-keyword" v-model="keyword" placeholder="搜索正文或评论" aria-label="朋友圈关键词" />
       </div>
       <button class="button primary" type="submit">搜索</button>
-      <button data-test="feed-clear" class="button ghost" type="button" @click="clearSearch">清空</button>
     </form>
   </section>
 
@@ -53,11 +52,6 @@ async function loadFeed() {
 async function submitComment(postId, content) {
   const response = await addComment(postId, content)
   if (response.success) await loadFeed()
-}
-
-function clearSearch() {
-  keyword.value = ''
-  loadFeed()
 }
 
 onMounted(loadFeed)
