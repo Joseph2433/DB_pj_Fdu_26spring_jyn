@@ -1,6 +1,6 @@
 # 2026 Spring 数据库应用开发大作业 Lab5
 
-本项目是一个基于 `Spring Boot + MyBatis + MySQL + Vue3` 的社交平台实验项目，支持用户注册登录、好友申请与分组、朋友圈发布与评论、关键词搜索、DeepSeek AI 文案助手、管理员审核与注销、个人资料与密码管理。
+本项目是一个基于 `Spring Boot + MyBatis + MySQL + Vue3` 的社交平台实验项目，支持用户注册登录、好友申请与分组、朋友圈发布与评论、关键词搜索、朋友圈可见范围设置、DeepSeek AI 文案助手、管理员审核与注销、个人资料与密码管理。
 
 ## 技术栈
 
@@ -32,6 +32,13 @@ mysql -u root -p < sql/seed.sql
 - 用户：`bob / 123456`
 - 用户：`cathy / 123456`
 - 管理员：`admin / admin123`
+
+已有数据库增量升级：
+
+```bash
+mysql -u root -p < sql/upgrade_friend_requests.sql
+mysql -u root -p < sql/upgrade_post_visibility_rules.sql
+```
 
 ### 启动后端
 
@@ -145,13 +152,15 @@ Lab5/
 │       │       ├── post/
 │       │       │   ├── CommentCreateRequest.java  # 新增评论请求模型。
 │       │       │   ├── CommentSummary.java  # 评论展示摘要模型。
-│       │       │   ├── PostController.java  # 朋友圈发布、查看、搜索、评论、修改和删除接口。
+│       │       │   ├── PostController.java  # 朋友圈发布、查看、搜索、评论、修改、删除和可见性接口。
 │       │       │   ├── PostCreateRequest.java  # 发布朋友圈请求模型。
-│       │       │   ├── PostMapper.java  # 朋友圈和评论的 MyBatis SQL。
+│       │       │   ├── PostMapper.java  # 朋友圈、评论和可见性规则的 MyBatis SQL。
 │       │       │   ├── PostRow.java  # 朋友圈 SQL 查询行模型。
 │       │       │   ├── PostService.java  # 朋友圈可见范围、搜索、评论和作者权限业务逻辑。
 │       │       │   ├── PostSummary.java  # 前端朋友圈卡片响应模型。
-│       │       │   └── PostUpdateRequest.java  # 修改朋友圈内容请求模型。
+│       │       │   ├── PostUpdateRequest.java  # 修改朋友圈内容请求模型。
+│       │       │   ├── PostVisibilityRule.java  # 朋友圈可见或不可见范围规则响应模型。
+│       │       │   └── PostVisibilityUpdateRequest.java  # 更新朋友圈可见或不可见范围请求模型。
 │       │       └── user/
 │       │           ├── ProfileUpdateRequest.java  # 用户个人资料修改请求模型。
 │       │           ├── UserController.java  # 用户资料、改密和用户搜索接口。
@@ -172,7 +181,8 @@ Lab5/
 │           │   ├── FriendRequestSchemaTest.java  # 校验好友申请升级 SQL 的关键结构。
 │           │   └── FriendServiceTest.java  # 校验好友申请、同意和双向删除逻辑。
 │           ├── post/
-│           │   └── PostServiceTest.java  # 校验朋友圈搜索、排序和可见范围 SQL。
+│           │   ├── PostControllerTest.java  # 校验朋友圈可见性接口使用当前登录用户。
+│           │   └── PostServiceTest.java  # 校验朋友圈搜索、排序、可见范围和模式互斥逻辑。
 │           └── user/
 │               ├── UserMapperTest.java  # 校验用户密码 SQL 的 active 用户约束。
 │               └── UserServiceTest.java  # 校验用户修改密码业务逻辑。
@@ -186,7 +196,7 @@ Lab5/
 │       ├── main.js  # 前端应用创建、路由挂载和全局样式引入入口。
 │       ├── styles.css  # 全站布局、组件、表单、卡片和响应式样式。
 │       ├── api/
-│       │   └── client.js  # Axios API 封装，统一调用后端接口。
+│       │   └── client.js  # Axios API 封装，统一调用后端接口和朋友圈可见性接口。
 │       ├── components/
 │       │   ├── AiDraftPanel.test.js  # AI 文案助手组件测试。
 │       │   ├── AiDraftPanel.vue  # 发布页 AI 文案助手面板。
@@ -219,13 +229,14 @@ Lab5/
 │           ├── UserFriendsView.test.js  # 好友、分组和申请交互测试。
 │           ├── UserFriendsView.vue  # 用户好友管理页面。
 │           ├── UserLayoutView.vue  # 用户端布局页面。
-│           ├── UserPostsView.test.js  # 我的动态评论、回复、编辑和删除测试。
-│           ├── UserPostsView.vue  # 我的朋友圈动态页面。
+│           ├── UserPostsView.test.js  # 我的动态评论、回复、编辑、删除和可见性测试。
+│           ├── UserPostsView.vue  # 我的朋友圈动态页面，支持可见或不可见范围二选一设置。
 │           └── UserProfileView.vue  # 用户个人资料页面。
 ├── sql/
 │   ├── schema.sql  # 创建数据库、表、索引、视图和触发器。
 │   ├── seed.sql  # 初始化演示账号、好友、朋友圈和评论数据。
-│   └── upgrade_friend_requests.sql  # 为已有库补充好友申请表和索引的升级脚本。
+│   ├── upgrade_friend_requests.sql  # 为已有库补充好友申请表和索引的升级脚本。
+│   └── upgrade_post_visibility_rules.sql  # 为已有库补充朋友圈可见性规则表和索引的升级脚本。
 └── docs/
     ├── 验收演示脚本.md  # 验收演示流程说明。
     └── superpowers/
@@ -249,6 +260,9 @@ erDiagram
     USERS ||--o{ FRIEND_REQUESTS : receiver
     FRIEND_GROUPS |o--o{ FRIEND_REQUESTS : requested_group
     USERS ||--o{ POSTS : publishes
+    POSTS ||--o{ POST_VISIBILITY_RULES : controls
+    USERS |o--o{ POST_VISIBILITY_RULES : user_target
+    FRIEND_GROUPS |o--o{ POST_VISIBILITY_RULES : group_target
     POSTS ||--o{ COMMENTS : has
     USERS ||--o{ COMMENTS : writes
     ADMINS ||--o{ POST_AUDIT_LOGS : operates
@@ -310,6 +324,15 @@ erDiagram
         DATETIME last_updated_at
     }
 
+    POST_VISIBILITY_RULES {
+        BIGINT id PK
+        BIGINT post_id FK
+        VARCHAR rule_type
+        VARCHAR target_type
+        BIGINT target_id
+        DATETIME created_at
+    }
+
     COMMENTS {
         BIGINT id PK
         BIGINT post_id FK
@@ -328,6 +351,8 @@ erDiagram
     }
 ```
 
+说明：`post_visibility_rules.target_id` 是按 `target_type` 区分的逻辑目标；`GROUP` 指向好友分组，`USER` 指向具体好友用户。
+
 ### 表与约束说明
 
 - `users`: 存储普通用户账号、资料、状态和密码哈希；`username` 唯一，`age` 限制在 `0-150`。
@@ -336,6 +361,7 @@ erDiagram
 - `friendships`: 存储双向好友关系中的单向边；删除好友时后端同时删除双方记录。
 - `friend_requests`: 存储好友申请；仅允许 `PENDING` 和 `ACCEPTED` 状态。
 - `posts`: 存储朋友圈正文、作者、状态、发布时间和最后更新时间；正文长度为 `1-280` 字。
+- `post_visibility_rules`: 存储朋友圈可见或不可见范围；`rule_type` 仅允许 `ALLOW/DENY`，`target_type` 仅允许 `GROUP/USER`，后端约束单条动态只能使用其中一种模式。
 - `comments`: 存储朋友圈评论；评论长度为 `1-160` 字。
 - `post_audit_logs`: 存储管理员或系统删除朋友圈、注销用户等审计记录。
 
@@ -344,6 +370,7 @@ erDiagram
 - `admin_post_review_view`: 聚合朋友圈及评论数量，供管理员审核列表使用。
 - `idx_posts_author_updated`: 加速按作者和更新时间查询朋友圈。
 - `idx_posts_content`: 支持朋友圈正文关键词搜索。
+- `idx_post_visibility_rules_post`: 加速按朋友圈读取可见或不可见范围规则。
 - `idx_comments_post_created`: 加速按朋友圈加载评论。
 - `idx_comments_content`: 支持评论内容关键词搜索。
 - `idx_friendships_owner`: 加速用户好友列表查询。
