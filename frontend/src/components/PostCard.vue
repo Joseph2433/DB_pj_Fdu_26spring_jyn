@@ -23,15 +23,31 @@
       <li v-for="comment in post.comments" :key="comment.id">
         <div class="comment-head">
           <strong>{{ authorLabel(comment) }}</strong>
-          <button
-            v-if="canComment"
-            class="text-button"
-            type="button"
-            :data-test="`reply-comment-${comment.id}`"
-            @click="replyTo(comment)"
+          <div
+            v-if="canDeleteComment(comment) || canComment"
+            class="comment-actions"
+            :data-test="`comment-actions-${comment.id}`"
           >
-            回复
-          </button>
+            <button
+              v-if="canDeleteComment(comment)"
+              class="text-button danger-text"
+              type="button"
+              :data-test="`delete-comment-${comment.id}`"
+              @click="deleteComment(comment)"
+            >
+              <Trash2 class="tiny-icon" aria-hidden="true" />
+              删除
+            </button>
+            <button
+              v-if="canComment"
+              class="text-button"
+              type="button"
+              :data-test="`reply-comment-${comment.id}`"
+              @click="replyTo(comment)"
+            >
+              回复
+            </button>
+          </div>
         </div>
         <span>{{ comment.content }}</span>
       </li>
@@ -49,17 +65,18 @@
 
 <script setup>
 import { ref } from 'vue'
-import { MessageCircle } from 'lucide-vue-next'
+import { MessageCircle, Trash2 } from 'lucide-vue-next'
 import CommentComposer from './CommentComposer.vue'
 import { authorLabel, commentCount, formatDateTime } from '../utils/formatters'
 
-defineProps({
+const props = defineProps({
   canComment: { type: Boolean, default: true },
+  currentUserId: { type: [Number, String], default: null },
   featured: { type: Boolean, default: false },
   post: { type: Object, required: true }
 })
 
-const emit = defineEmits(['comment'])
+const emit = defineEmits(['comment', 'delete-comment'])
 const replyPrefill = ref('')
 const replyPrefillKey = ref(0)
 
@@ -70,5 +87,17 @@ function forwardComment(postId, content) {
 function replyTo(comment) {
   replyPrefill.value = `回复 ${authorLabel(comment)}：`
   replyPrefillKey.value += 1
+}
+
+function canDeleteComment(comment) {
+  if (props.currentUserId === null || props.currentUserId === undefined) {
+    return false
+  }
+  const currentUserId = Number(props.currentUserId)
+  return Number(comment.authorId) === currentUserId || Number(props.post.authorId) === currentUserId
+}
+
+function deleteComment(comment) {
+  emit('delete-comment', props.post.id, comment.id)
 }
 </script>

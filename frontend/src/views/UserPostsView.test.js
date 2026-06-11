@@ -5,11 +5,13 @@ import * as api from '../api/client'
 
 vi.mock('../api/client', () => ({
   addComment: vi.fn(),
+  deleteComment: vi.fn(),
   deletePost: vi.fn(),
   fetchFriends: vi.fn(),
   fetchGroups: vi.fn(),
   fetchMyPosts: vi.fn(),
   fetchPostVisibility: vi.fn(),
+  getMe: vi.fn(),
   updatePostVisibility: vi.fn(),
   updatePost: vi.fn()
 }))
@@ -37,7 +39,9 @@ describe('UserPostsView', () => {
     vi.clearAllMocks()
     mockMyPosts()
     api.addComment.mockResolvedValue({ success: true })
+    api.deleteComment.mockResolvedValue({ success: true })
     api.deletePost.mockResolvedValue({ success: true })
+    api.getMe.mockResolvedValue({ success: true, data: { id: 1 } })
     api.fetchGroups.mockResolvedValue({
       success: true,
       data: [{ id: 7, userId: 1, name: 'Project Team' }]
@@ -66,6 +70,17 @@ describe('UserPostsView', () => {
     await flushPromises()
 
     expect(api.addComment).toHaveBeenCalledWith(12, 'My own follow-up')
+    expect(api.fetchMyPosts).toHaveBeenCalledTimes(2)
+  })
+
+  it('deletes comments from my posts', async () => {
+    const wrapper = mount(UserPostsView)
+    await flushPromises()
+
+    await wrapper.find('[data-test="delete-comment-3"]').trigger('click')
+    await flushPromises()
+
+    expect(api.deleteComment).toHaveBeenCalledWith(12, 3)
     expect(api.fetchMyPosts).toHaveBeenCalledTimes(2)
   })
 

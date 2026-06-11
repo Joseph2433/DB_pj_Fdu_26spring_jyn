@@ -16,7 +16,9 @@
       v-for="post in posts"
       :key="post.id"
       :post="post"
+      :current-user-id="currentUserId"
       @comment="submitComment"
+      @delete-comment="submitDeleteComment"
     />
   </section>
 </template>
@@ -25,15 +27,23 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import PostCard from '../components/PostCard.vue'
-import { addComment, fetchFriendPosts } from '../api/client'
+import { addComment, deleteComment, fetchFriendPosts, getMe } from '../api/client'
 
 const route = useRoute()
 const posts = ref([])
 const loading = ref(false)
+const currentUserId = ref(null)
 
 const friendId = computed(() => Number(route.params.friendId))
 const friendName = computed(() => String(route.query.name || route.query.username || posts.value[0]?.authorUsername || '好友'))
 const friendUsername = computed(() => route.query.username ? String(route.query.username) : '')
+
+async function loadCurrentUser() {
+  const response = await getMe()
+  if (response.success) {
+    currentUserId.value = Number(response.data.id)
+  }
+}
 
 async function loadPosts() {
   loading.value = true
@@ -50,6 +60,14 @@ async function submitComment(postId, content) {
   if (response.success) await loadPosts()
 }
 
+async function submitDeleteComment(postId, commentId) {
+  const response = await deleteComment(postId, commentId)
+  if (response.success) await loadPosts()
+}
+
 watch(friendId, loadPosts)
-onMounted(loadPosts)
+onMounted(() => {
+  loadCurrentUser()
+  loadPosts()
+})
 </script>

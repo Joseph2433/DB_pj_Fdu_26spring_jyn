@@ -12,7 +12,9 @@ vi.mock('vue-router', () => ({
 
 vi.mock('../api/client', () => ({
   addComment: vi.fn(),
-  fetchFriendPosts: vi.fn()
+  deleteComment: vi.fn(),
+  fetchFriendPosts: vi.fn(),
+  getMe: vi.fn()
 }))
 
 describe('UserFriendPostsView', () => {
@@ -30,7 +32,9 @@ describe('UserFriendPostsView', () => {
         }
       ]
     })
+    api.getMe.mockResolvedValue({ success: true, data: { id: 1 } })
     api.addComment.mockResolvedValue({ success: true })
+    api.deleteComment.mockResolvedValue({ success: true })
 
     const wrapper = mount(UserFriendPostsView, {
       global: {
@@ -56,6 +60,11 @@ describe('UserFriendPostsView', () => {
     await flushPromises()
 
     expect(api.addComment).toHaveBeenCalledWith(21, 'Great')
-    expect(api.fetchFriendPosts).toHaveBeenCalledTimes(2)
+
+    await wrapper.find('[data-test="delete-comment-4"]').trigger('click')
+    await flushPromises()
+
+    expect(api.deleteComment).toHaveBeenCalledWith(21, 4)
+    expect(api.fetchFriendPosts).toHaveBeenCalledTimes(3)
   })
 })

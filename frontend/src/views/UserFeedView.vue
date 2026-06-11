@@ -23,8 +23,10 @@
       v-for="(post, index) in posts"
       :key="post.id"
       :post="post"
+      :current-user-id="currentUserId"
       :featured="index === 0"
       @comment="submitComment"
+      @delete-comment="submitDeleteComment"
     />
   </section>
 </template>
@@ -33,11 +35,19 @@
 import { onMounted, ref } from 'vue'
 import { Search } from 'lucide-vue-next'
 import PostCard from '../components/PostCard.vue'
-import { addComment, fetchFeed } from '../api/client'
+import { addComment, deleteComment, fetchFeed, getMe } from '../api/client'
 
 const keyword = ref('')
 const posts = ref([])
 const loading = ref(false)
+const currentUserId = ref(null)
+
+async function loadCurrentUser() {
+  const response = await getMe()
+  if (response.success) {
+    currentUserId.value = Number(response.data.id)
+  }
+}
 
 async function loadFeed() {
   loading.value = true
@@ -54,5 +64,13 @@ async function submitComment(postId, content) {
   if (response.success) await loadFeed()
 }
 
-onMounted(loadFeed)
+async function submitDeleteComment(postId, commentId) {
+  const response = await deleteComment(postId, commentId)
+  if (response.success) await loadFeed()
+}
+
+onMounted(() => {
+  loadCurrentUser()
+  loadFeed()
+})
 </script>

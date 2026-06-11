@@ -14,7 +14,9 @@
       v-for="post in posts"
       :key="post.id"
       :post="post"
+      :current-user-id="currentUserId"
       @comment="submitComment"
+      @delete-comment="submitDeleteComment"
     >
       <template #actions>
         <div class="button-cluster post-owner-actions">
@@ -174,16 +176,19 @@ import { Eye, EyeOff, RefreshCw, X } from 'lucide-vue-next'
 import PostCard from '../components/PostCard.vue'
 import {
   addComment,
+  deleteComment,
   deletePost,
   fetchFriends,
   fetchGroups,
   fetchMyPosts,
   fetchPostVisibility,
+  getMe,
   updatePost,
   updatePostVisibility
 } from '../api/client'
 
 const posts = ref([])
+const currentUserId = ref(null)
 const edits = reactive({})
 const editingPostId = ref(null)
 const postVisibilityRules = ref({})
@@ -202,6 +207,13 @@ const selectedVisibilityIds = ref([])
 const visibilityTitle = computed(() => (
   visibilityRuleType.value === 'ALLOW' ? '设置可见范围' : '设置不可见范围'
 ))
+
+async function loadCurrentUser() {
+  const response = await getMe()
+  if (response.success) {
+    currentUserId.value = Number(response.data.id)
+  }
+}
 
 async function loadPosts() {
   const response = await fetchMyPosts()
@@ -223,6 +235,11 @@ function cancelEdit() {
 
 async function submitComment(postId, content) {
   const response = await addComment(postId, content)
+  if (response.success) await loadPosts()
+}
+
+async function submitDeleteComment(postId, commentId) {
+  const response = await deleteComment(postId, commentId)
   if (response.success) await loadPosts()
 }
 
@@ -365,5 +382,8 @@ function visibilityModeTitle(postId, ruleType) {
   return ruleType === 'ALLOW' ? '已设置不可见范围' : '已设置可见范围'
 }
 
-onMounted(loadPosts)
+onMounted(() => {
+  loadCurrentUser()
+  loadPosts()
+})
 </script>

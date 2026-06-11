@@ -5,7 +5,9 @@ import * as api from '../api/client'
 
 vi.mock('../api/client', () => ({
   addComment: vi.fn(),
-  fetchFeed: vi.fn()
+  deleteComment: vi.fn(),
+  fetchFeed: vi.fn(),
+  getMe: vi.fn()
 }))
 
 describe('UserFeedView', () => {
@@ -27,7 +29,10 @@ describe('UserFeedView', () => {
       .mockResolvedValueOnce(postResult)
       .mockResolvedValueOnce(postResult)
       .mockResolvedValueOnce(postResult)
+      .mockResolvedValueOnce(postResult)
+    api.getMe.mockResolvedValue({ success: true, data: { id: 1 } })
     api.addComment.mockResolvedValue({ success: true })
+    api.deleteComment.mockResolvedValue({ success: true })
 
     const wrapper = mount(UserFeedView)
     await flushPromises()
@@ -41,6 +46,11 @@ describe('UserFeedView', () => {
     await wrapper.find('[data-test="comment-form-7"]').trigger('submit')
     await flushPromises()
     expect(api.addComment).toHaveBeenCalledWith(7, '收到')
+
+    await wrapper.find('[data-test="delete-comment-3"]').trigger('click')
+    await flushPromises()
+
+    expect(api.deleteComment).toHaveBeenCalledWith(7, 3)
 
     expect(wrapper.text()).toContain('bob')
     expect(wrapper.text()).toContain('alice')

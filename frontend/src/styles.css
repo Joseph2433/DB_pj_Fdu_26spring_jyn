@@ -176,6 +176,18 @@ h2 {
   text-decoration: underline;
 }
 
+.text-button.danger-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--coral);
+}
+
+.text-button.danger-text:hover,
+.text-button.danger-text:focus-visible {
+  color: #a84035;
+}
+
 .full {
   width: 100%;
 }
@@ -802,6 +814,13 @@ h2 {
   min-width: 0;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
+}
+
+.comment-actions {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
   gap: 10px;
 }
 

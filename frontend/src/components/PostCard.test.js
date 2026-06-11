@@ -34,4 +34,32 @@ describe('PostCard', () => {
 
     expect(wrapper.emitted('comment')[0]).toEqual([12, submittedText])
   })
+
+  it('shows a delete comment button before reply for manageable comments', async () => {
+    const wrapper = mount(PostCard, {
+      props: {
+        currentUserId: 1,
+        post: {
+          id: 12,
+          authorId: 2,
+          authorUsername: 'bob',
+          content: 'Friend post',
+          lastUpdatedAt: '2026-06-07T12:00:00',
+          comments: [
+            { id: 3, authorId: 1, authorUsername: 'alice', content: 'My comment', createdAt: '2026-06-07T12:10:00' }
+          ]
+        }
+      }
+    })
+
+    const actionButtons = wrapper.findAll('[data-test="comment-actions-3"] button')
+    expect(actionButtons.map((button) => button.attributes('data-test'))).toEqual([
+      'delete-comment-3',
+      'reply-comment-3'
+    ])
+
+    await wrapper.find('[data-test="delete-comment-3"]').trigger('click')
+
+    expect(wrapper.emitted('delete-comment')[0]).toEqual([12, 3])
+  })
 })

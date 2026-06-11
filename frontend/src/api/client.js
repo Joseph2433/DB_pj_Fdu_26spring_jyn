@@ -157,6 +157,11 @@ export async function addComment(postId, content) {
   return data
 }
 
+export async function deleteComment(postId, commentId) {
+  const { data } = await http.delete(`/posts/${postId}/comments/${commentId}`)
+  return data
+}
+
 export async function getAdminMe() {
   const { data } = await http.get('/admin/me')
   return data
