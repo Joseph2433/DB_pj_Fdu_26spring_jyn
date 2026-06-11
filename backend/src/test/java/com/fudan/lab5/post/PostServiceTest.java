@@ -133,6 +133,28 @@ class PostServiceTest {
         assertThat(sql).contains("u.username AS author_username");
     }
 
+    @Test
+    void deletesCommentWhenCurrentUserCanManageIt() {
+        RecordingPostMapper mapper = new RecordingPostMapper();
+        PostService service = new PostService(mapper);
+
+        service.deleteComment(2L, 12L, 88L);
+
+        assertThat(mapper.deletedCommentPostId).isEqualTo(12L);
+        assertThat(mapper.deletedCommentId).isEqualTo(88L);
+        assertThat(mapper.deletedCommentUserId).isEqualTo(2L);
+    }
+
+    @Test
+    void rejectsDeletingCommentThatCurrentUserCannotManage() {
+        RecordingPostMapper mapper = new RecordingPostMapper();
+        mapper.deletedCommentCount = 0;
+        PostService service = new PostService(mapper);
+
+        assertThatThrownBy(() -> service.deleteComment(2L, 12L, 88L))
+            .isInstanceOf(IllegalArgumentException.class);
+    }
+
     static class RecordingPostMapper implements PostMapper {
         String keyword;
         long friendViewerId;
@@ -144,6 +166,10 @@ class PostServiceTest {
         String oppositeCheckRuleType;
         String deletedVisibilityRuleType;
         String deletedVisibilityTargetType;
+        long deletedCommentPostId;
+        long deletedCommentId;
+        long deletedCommentUserId;
+        int deletedCommentCount = 1;
         List<Long> insertedVisibilityTargetIds = new ArrayList<>();
 
         @Override
@@ -232,6 +258,14 @@ class PostServiceTest {
         public int insertVisibilityRules(long postId, String ruleType, String targetType, List<Long> targetIds) {
             insertedVisibilityTargetIds = targetIds;
             return targetIds.size();
+        }
+
+        @Override
+        public int deleteManageableComment(long postId, long commentId, long userId) {
+            deletedCommentPostId = postId;
+            deletedCommentId = commentId;
+            deletedCommentUserId = userId;
+            return deletedCommentCount;
         }
     }
 }

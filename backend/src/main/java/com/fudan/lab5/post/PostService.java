@@ -63,6 +63,13 @@ public class PostService {
     }
 
     @Transactional
+    public void deleteComment(long userId, long postId, long commentId) {
+        if (postMapper.deleteManageableComment(postId, commentId, userId) == 0) {
+            throw new IllegalArgumentException("只能删除自己的评论或自己朋友圈下的评论");
+        }
+    }
+
+    @Transactional
     public void updateVisibility(long userId, long postId, PostVisibilityUpdateRequest request) {
         ensureOwnPost(userId, postId);
         String ruleType = normalizeOption(request.ruleType(), List.of("ALLOW", "DENY"), "可见性规则");

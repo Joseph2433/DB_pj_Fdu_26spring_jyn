@@ -76,4 +76,10 @@ public class PostController {
         postService.comment(currentSession.requireUserId(session), postId, request);
         return ApiResponse.ok(null);
     }
+
+    @DeleteMapping("/{postId}/comments/{commentId}")
+    public ApiResponse<Void> deleteComment(@PathVariable long postId, @PathVariable long commentId, HttpSession session) {
+        postService.deleteComment(currentSession.requireUserId(session), postId, commentId);
+        return ApiResponse.ok(null);
+    }
 }

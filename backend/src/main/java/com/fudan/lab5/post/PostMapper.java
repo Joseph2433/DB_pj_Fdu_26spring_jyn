@@ -181,6 +181,17 @@ public interface PostMapper {
     @Insert("INSERT INTO comments(post_id, author_id, content) VALUES (#{postId}, #{authorId}, #{content})")
     int insertComment(@Param("postId") long postId, @Param("authorId") long authorId, @Param("content") String content);
 
+    @Delete("""
+        DELETE c
+        FROM comments c
+        JOIN posts p ON p.id = c.post_id
+        WHERE c.id = #{commentId}
+          AND c.post_id = #{postId}
+          AND (c.author_id = #{userId} OR p.author_id = #{userId})
+        """)
+    int deleteManageableComment(@Param("postId") long postId, @Param("commentId") long commentId,
+                                @Param("userId") long userId);
+
     @Select("""
         SELECT COUNT(*)
         FROM posts p

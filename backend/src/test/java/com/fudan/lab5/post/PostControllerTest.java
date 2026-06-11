@@ -41,6 +41,18 @@ class PostControllerTest {
         assertThat(postService.updateRequest).isEqualTo(request);
     }
 
+    @Test
+    void deletesCommentForCurrentUser() {
+        MockHttpSession session = loggedInUser();
+
+        ApiResponse<Void> response = controller.deleteComment(12L, 88L, session);
+
+        assertThat(response.success()).isTrue();
+        assertThat(postService.deleteCommentUserId).isEqualTo(42L);
+        assertThat(postService.deleteCommentPostId).isEqualTo(12L);
+        assertThat(postService.deleteCommentId).isEqualTo(88L);
+    }
+
     private MockHttpSession loggedInUser() {
         MockHttpSession session = new MockHttpSession();
         session.setAttribute("userId", 42L);
@@ -52,6 +64,9 @@ class PostControllerTest {
         long visibilityPostId;
         long updateUserId;
         long updatePostId;
+        long deleteCommentUserId;
+        long deleteCommentPostId;
+        long deleteCommentId;
         PostVisibilityUpdateRequest updateRequest;
         List<PostVisibilityRule> visibilityRules = new ArrayList<>();
 
@@ -71,6 +86,13 @@ class PostControllerTest {
             updateUserId = userId;
             updatePostId = postId;
             updateRequest = request;
+        }
+
+        @Override
+        public void deleteComment(long userId, long postId, long commentId) {
+            deleteCommentUserId = userId;
+            deleteCommentPostId = postId;
+            deleteCommentId = commentId;
         }
     }
 }
