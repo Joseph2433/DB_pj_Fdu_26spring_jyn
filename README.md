@@ -33,13 +33,6 @@ mysql -u root -p < sql/seed.sql
 - 用户：`cathy / 123456`
 - 管理员：`admin / admin123`
 
-已有数据库增量升级：
-
-```bash
-mysql -u root -p < sql/upgrade_friend_requests.sql
-mysql -u root -p < sql/upgrade_post_visibility_rules.sql
-```
-
 ### 启动后端
 
 ```bash
@@ -234,9 +227,7 @@ Lab5/
 │           └── UserProfileView.vue  # 用户个人资料页面。
 ├── sql/
 │   ├── schema.sql  # 创建数据库、表、索引、视图和触发器。
-│   ├── seed.sql  # 初始化演示账号、好友、朋友圈和评论数据。
-│   ├── upgrade_friend_requests.sql  # 为已有库补充好友申请表和索引的升级脚本。
-│   └── upgrade_post_visibility_rules.sql  # 为已有库补充朋友圈可见性规则表和索引的升级脚本。
+│   └── seed.sql  # 初始化演示账号、好友、朋友圈和评论数据。
 └── docs/
     ├── 验收演示脚本.md  # 验收演示流程说明。
     └── superpowers/

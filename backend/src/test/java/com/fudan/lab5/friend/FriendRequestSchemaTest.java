@@ -11,18 +11,25 @@ import static org.assertj.core.api.Assertions.assertThat;
 class FriendRequestSchemaTest {
     @Test
     void friendRequestSchemaAllowsMultipleAcceptedHistoryRowsForSamePair() throws IOException {
-        String schema = Files.readString(Path.of("..", "sql", "schema.sql"));
-        String upgrade = Files.readString(Path.of("..", "sql", "upgrade_friend_requests.sql"));
+        String schema = readSchema();
 
         assertThat(schema).doesNotContain("uk_friend_requests_pair_status UNIQUE");
-        assertThat(upgrade).doesNotContain("uk_friend_requests_pair_status UNIQUE");
     }
 
     @Test
-    void upgradeScriptCreatesReplacementRequesterIndexBeforeDroppingOldUniqueIndex() throws IOException {
-        String upgrade = Files.readString(Path.of("..", "sql", "upgrade_friend_requests.sql"));
+    void friendRequestSchemaCreatesRequesterReceiverStatusIndex() throws IOException {
+        String schema = readSchema();
 
-        assertThat(upgrade.indexOf("CREATE INDEX idx_friend_requests_requester_receiver_status"))
-            .isLessThan(upgrade.indexOf("ALTER TABLE friend_requests DROP INDEX uk_friend_requests_pair_status"));
+        assertThat(schema).contains(
+            "CREATE INDEX idx_friend_requests_requester_receiver_status ON friend_requests(requester_id, receiver_id, status)"
+        );
+    }
+
+    private static String readSchema() throws IOException {
+        Path schemaFromBackend = Path.of("..", "sql", "schema.sql");
+        if (Files.exists(schemaFromBackend)) {
+            return Files.readString(schemaFromBackend);
+        }
+        return Files.readString(Path.of("sql", "schema.sql"));
     }
 }
