@@ -182,6 +182,11 @@ export async function fetchAdminPosts() {
   return data
 }
 
+export async function fetchAdminAuditLogs() {
+  const { data } = await http.get('/admin/audit-logs')
+  return data
+}
+
 export async function adminDeletePost(postId) {
   const { data } = await http.delete(`/admin/posts/${postId}`)
   return data

@@ -29,6 +29,24 @@ class AdminServiceTest {
     }
 
     @Test
+    void auditLogsReturnLatestAdminActions() {
+        RecordingAdminMapper mapper = new RecordingAdminMapper();
+        AdminService service = new AdminService(mapper, passwordService);
+
+        List<AdminAuditLog> logs = service.auditLogs();
+
+        assertThat(logs).containsExactly(new AdminAuditLog(
+            5L,
+            8L,
+            99L,
+            "admin",
+            "ADMIN_DELETE_POST",
+            "管理员审核删除朋友圈",
+            LocalDateTime.of(2026, 6, 7, 12, 30)
+        ));
+    }
+
+    @Test
     void deleteUserByUsernameUsesTrimmedAccountName() {
         RecordingAdminMapper mapper = new RecordingAdminMapper();
         AdminService service = new AdminService(mapper, passwordService);
@@ -95,6 +113,19 @@ class AdminServiceTest {
         @Override
         public List<CommentSummary> selectComments(long postId) {
             return List.of(new CommentSummary(3L, 2L, "bob", "Looks good", LocalDateTime.of(2026, 6, 7, 12, 10)));
+        }
+
+        @Override
+        public List<AdminAuditLog> selectAuditLogs() {
+            return List.of(new AdminAuditLog(
+                5L,
+                8L,
+                99L,
+                "admin",
+                "ADMIN_DELETE_POST",
+                "管理员审核删除朋友圈",
+                LocalDateTime.of(2026, 6, 7, 12, 30)
+            ));
         }
 
         @Override

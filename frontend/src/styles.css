@@ -1244,6 +1244,59 @@ h2 {
   word-break: break-word;
 }
 
+.audit-log-dialog {
+  width: min(760px, 100%);
+}
+
+.audit-log-list {
+  display: grid;
+  max-height: min(58vh, 520px);
+  gap: 10px;
+  margin: 0;
+  overflow: auto;
+  padding: 0;
+  list-style: none;
+}
+
+.audit-log-list li {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(246, 247, 241, 0.78);
+  padding: 12px;
+}
+
+.audit-log-main,
+.audit-log-meta {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.audit-log-main {
+  justify-content: space-between;
+}
+
+.audit-log-main strong {
+  color: var(--ink);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.audit-log-main span,
+.audit-log-list p {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.audit-log-list p {
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
 .danger-zone {
   border-color: rgba(201, 86, 72, 0.45);
 }

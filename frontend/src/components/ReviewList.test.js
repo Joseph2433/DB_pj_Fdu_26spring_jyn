@@ -6,6 +6,7 @@ import * as api from '../api/client'
 vi.mock('../api/client', () => ({
   adminDeletePost: vi.fn(),
   adminDeleteUser: vi.fn(),
+  fetchAdminAuditLogs: vi.fn(),
   fetchAdminPosts: vi.fn()
 }))
 
@@ -71,5 +72,35 @@ describe('ReviewList', () => {
     await flushPromises()
 
     expect(api.adminDeleteUser).toHaveBeenCalledWith('bob')
+  })
+
+  it('opens an audit log dialog from the review toolbar', async () => {
+    api.fetchAdminPosts.mockResolvedValue({ success: true, data: [] })
+    api.fetchAdminAuditLogs.mockResolvedValue({
+      success: true,
+      data: [
+        {
+          id: 5,
+          postId: 8,
+          adminId: 99,
+          adminUsername: 'admin',
+          action: 'ADMIN_DELETE_POST',
+          reason: 'moderated',
+          createdAt: '2026-06-07T12:30:00'
+        }
+      ]
+    })
+
+    const wrapper = mount(ReviewList)
+    await flushPromises()
+
+    await wrapper.find('[data-test="audit-log-open"]').trigger('click')
+    await flushPromises()
+
+    expect(api.fetchAdminAuditLogs).toHaveBeenCalled()
+    expect(wrapper.find('[data-test="audit-log-dialog"]').exists()).toBe(true)
+    expect(wrapper.text()).toContain('ADMIN_DELETE_POST')
+    expect(wrapper.text()).toContain('moderated')
+    expect(wrapper.text()).toContain('admin')
   })
 })

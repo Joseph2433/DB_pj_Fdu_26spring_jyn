@@ -48,6 +48,12 @@ public class AdminController {
         return ApiResponse.ok(adminService.reviewPosts());
     }
 
+    @GetMapping("/audit-logs")
+    public ApiResponse<List<AdminAuditLog>> auditLogs(HttpSession session) {
+        currentSession.requireAdminId(session);
+        return ApiResponse.ok(adminService.auditLogs());
+    }
+
     @DeleteMapping("/posts/{postId}")
     public ApiResponse<Void> deletePost(@PathVariable long postId, HttpSession session) {
         adminService.deletePost(currentSession.requireAdminId(session), postId);

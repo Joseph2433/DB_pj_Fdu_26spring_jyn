@@ -35,6 +35,16 @@ class AdminMapperTest {
     }
 
     @Test
+    void auditLogsSqlIncludesAdminUsernameAndOrdersLatestFirst() throws NoSuchMethodException {
+        Method method = AdminMapper.class.getMethod("selectAuditLogs");
+        String sql = String.join("\n", method.getAnnotation(Select.class).value());
+
+        assertThat(sql).contains("FROM post_audit_logs l");
+        assertThat(sql).contains("a.username AS admin_username");
+        assertThat(sql).contains("ORDER BY l.created_at DESC, l.id DESC");
+    }
+
+    @Test
     void deleteUserByUsernameSqlDeletesByBoundUsername() throws NoSuchMethodException {
         Method method = AdminMapper.class.getMethod("deleteUserByUsername", String.class);
         String sql = method.getAnnotation(Delete.class).value()[0];

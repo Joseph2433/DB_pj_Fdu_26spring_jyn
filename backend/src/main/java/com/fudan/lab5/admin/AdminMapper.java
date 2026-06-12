@@ -46,6 +46,21 @@ public interface AdminMapper {
     @Delete("DELETE FROM users WHERE username = #{username}")
     int deleteUserByUsername(@Param("username") String username);
 
+    @Select("""
+        SELECT
+          l.id,
+          l.post_id,
+          l.admin_id,
+          a.username AS admin_username,
+          l.action,
+          l.reason,
+          l.created_at
+        FROM post_audit_logs l
+        LEFT JOIN admins a ON a.id = l.admin_id
+        ORDER BY l.created_at DESC, l.id DESC
+        """)
+    List<AdminAuditLog> selectAuditLogs();
+
     @Insert("""
         INSERT INTO post_audit_logs(post_id, admin_id, action, reason)
         VALUES (#{postId}, #{adminId}, #{action}, #{reason})

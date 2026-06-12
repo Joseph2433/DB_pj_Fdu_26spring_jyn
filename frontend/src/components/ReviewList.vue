@@ -28,6 +28,10 @@
           <button class="icon-button" type="button" title="刷新列表" @click="loadPosts">
             <RefreshCw class="button-icon" aria-hidden="true" />
           </button>
+          <button class="button ghost" data-test="audit-log-open" type="button" @click="openAuditLogs">
+            <ScrollText class="button-icon" aria-hidden="true" />
+            日志
+          </button>
         </div>
       </header>
 
@@ -123,17 +127,59 @@
       </div>
       <p v-if="message" :class="messageType">{{ message }}</p>
     </div>
+
+    <div v-if="auditDialogOpen" class="dialog-backdrop" data-test="audit-log-dialog" @click.self="closeAuditLogs">
+      <section class="friend-request-dialog audit-log-dialog" role="dialog" aria-modal="true">
+        <header class="panel-heading">
+          <div>
+            <p class="eyebrow">Audit Logs</p>
+            <h2>审计日志</h2>
+          </div>
+          <div class="button-cluster">
+            <button class="icon-button" type="button" title="刷新日志" @click="loadAuditLogs">
+              <RefreshCw class="button-icon" aria-hidden="true" />
+            </button>
+            <button class="icon-button" type="button" title="关闭" @click="closeAuditLogs">
+              <X class="button-icon" aria-hidden="true" />
+            </button>
+          </div>
+        </header>
+
+        <p v-if="auditLoading" class="muted-message">正在读取日志...</p>
+        <p v-else-if="auditLogs.length === 0" class="empty-state">暂无审计日志</p>
+
+        <ul v-else class="audit-log-list">
+          <li v-for="log in auditLogs" :key="log.id">
+            <div class="audit-log-main">
+              <strong>{{ log.action }}</strong>
+              <span>{{ formatDateTime(log.createdAt) }}</span>
+            </div>
+            <div class="audit-log-meta">
+              <span class="meta-pill">动态 {{ log.postId ?? '-' }}</span>
+              <span class="meta-pill">管理员 {{ log.adminUsername || 'system' }}</span>
+            </div>
+            <p>{{ log.reason || '无说明' }}</p>
+          </li>
+        </ul>
+
+        <p v-if="auditError" class="error-message">{{ auditError }}</p>
+      </section>
+    </div>
   </section>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'
-import { RefreshCw, ShieldAlert, Trash2 } from 'lucide-vue-next'
-import { adminDeletePost, adminDeleteUser, fetchAdminPosts } from '../api/client'
+import { RefreshCw, ScrollText, ShieldAlert, Trash2, X } from 'lucide-vue-next'
+import { adminDeletePost, adminDeleteUser, fetchAdminAuditLogs, fetchAdminPosts } from '../api/client'
 import PostCard from './PostCard.vue'
 import { authorLabel, commentCount, formatDateTime } from '../utils/formatters'
 
 const posts = ref([])
+const auditLogs = ref([])
+const auditDialogOpen = ref(false)
+const auditLoading = ref(false)
+const auditError = ref('')
 const targetUsername = ref('')
 const message = ref('')
 const messageType = ref('muted-message')
@@ -142,6 +188,28 @@ const viewMode = ref('list')
 async function loadPosts() {
   const response = await fetchAdminPosts()
   posts.value = response.success ? response.data : []
+}
+
+async function loadAuditLogs() {
+  auditLoading.value = true
+  auditError.value = ''
+  try {
+    const response = await fetchAdminAuditLogs()
+    auditLogs.value = response.success ? response.data : []
+    auditError.value = response.success ? '' : response.message || '日志读取失败'
+  } finally {
+    auditLoading.value = false
+  }
+}
+
+async function openAuditLogs() {
+  auditDialogOpen.value = true
+  await loadAuditLogs()
+}
+
+function closeAuditLogs() {
+  auditDialogOpen.value = false
+  auditError.value = ''
 }
 
 async function removePost(postId) {

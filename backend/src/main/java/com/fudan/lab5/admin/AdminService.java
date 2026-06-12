@@ -33,6 +33,10 @@ public class AdminService {
             .toList();
     }
 
+    public List<AdminAuditLog> auditLogs() {
+        return adminMapper.selectAuditLogs();
+    }
+
     public AdminProfile profile(long adminId) {
         AdminProfile profile = adminMapper.selectProfile(adminId);
         if (profile == null) {
